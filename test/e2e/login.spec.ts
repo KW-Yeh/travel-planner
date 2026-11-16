@@ -18,6 +18,7 @@ test("shows an error for a wrong password, then signs in and stays signed in", a
 
   await fillLogin(page, TEST_USERNAME, TEST_PASSWORD);
   await expect(page.getByText(`已登入：${TEST_USERNAME}`)).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText("已同步到雲端");
 
   const [cookie] = (await context.cookies()).filter((c) => c.name === "__Host-tp_session");
   expect(cookie).toBeDefined();

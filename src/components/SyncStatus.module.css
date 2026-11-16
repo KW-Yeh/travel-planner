@@ -1,0 +1,39 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--glass-fallback);
+  border-top: 1px solid var(--color-line);
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .bar {
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.ok {
+  background: var(--color-ok);
+}
+.busy {
+  background: var(--color-primary);
+}
+.warn {
+  background: var(--color-transit);
+}
+.error {
+  background: var(--color-danger);
+}
