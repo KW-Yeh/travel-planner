@@ -40,7 +40,10 @@ export function TripLayout() {
   const timelineMatch = useMatch("/trips/:tripId");
   if (bundle === undefined) return null;
   if (bundle === null) return <Navigate to="/" replace />;
-  const day = selectDay(bundle, params.get("day"));
+  // An editor opened without ?day (an old link, a reload) still belongs to the day of what it edits.
+  const legStopId = bundle.legs.find((l) => l.id === legMatch?.params.legId)?.to_stop_id;
+  const itemDayId = bundle.stops.find((s) => s.id === (stopMatch?.params.stopId ?? legStopId))?.day_id ?? null;
+  const day = selectDay(bundle, params.get("day") ?? itemDayId);
   const context: TripContext = { bundle, day, search: location.search };
   const editing = stopMatch !== null || legMatch !== null;
   const selectedStop = stopMatch?.params.stopId ?? null;

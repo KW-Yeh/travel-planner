@@ -45,6 +45,7 @@ function leg(from: Stop, to: Stop, minutes: number | null, extra: Partial<Leg> =
     source: "google",
     fetched_at: null,
     query_depart_at: null,
+    note: null,
     ...extra,
   };
 }

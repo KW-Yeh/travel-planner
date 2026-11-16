@@ -64,6 +64,8 @@ export const LegRow = z.object({
   source: z.enum(["google", "manual"]),
   fetched_at: epochMs.nullable(),
   query_depart_at: epochMs.nullable(),
+  // Defaults so rows from app versions without notes (queued offline before an update) still validate.
+  note: text(2000).nullable().default(null),
 });
 
 export const ReservationRow = z.object({

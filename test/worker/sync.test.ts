@@ -146,6 +146,33 @@ describe("sync push", () => {
     expect(res.status).toBe(400);
   });
 
+  it("stores a leg note and accepts legs from app versions without one", async () => {
+    const leg = {
+      id: crypto.randomUUID(),
+      updated_at: 1_000,
+      deleted: 0,
+      trip_id: crypto.randomUUID(),
+      from_stop_id: crypto.randomUUID(),
+      to_stop_id: crypto.randomUUID(),
+      mode: "transit",
+      minutes: 25,
+      steps: null,
+      polyline: null,
+      source: "manual",
+      fetched_at: null,
+      query_depart_at: null,
+    };
+    const noted = { ...leg, id: crypto.randomUUID(), from_stop_id: crypto.randomUUID(), note: "JR 奈良線 2 號月台" };
+    const res = await push([
+      { table: "legs", row: leg },
+      { table: "legs", row: noted },
+    ]);
+    expect(res.rejected).toEqual([]);
+    const { changes } = await pull(0);
+    const notes = Object.fromEntries(changes.filter((c) => c.table === "legs").map((c) => [c.row.id, (c.row as { note: string | null }).note]));
+    expect(notes).toEqual({ [leg.id]: null, [noted.id]: "JR 奈良線 2 號月台" });
+  });
+
   it("requires a session", async () => {
     const res = await api("/api/sync/push", {
       method: "POST",

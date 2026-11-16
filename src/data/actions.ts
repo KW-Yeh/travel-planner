@@ -189,6 +189,7 @@ export async function ensureLegs(tripId: string, dayIds: (string | null)[], data
               source: "google",
               fetched_at: null,
               query_depart_at: null,
+              note: null,
             },
       });
     }
@@ -205,6 +206,10 @@ export async function ensureLeg(tripId: string, from: Stop, to: Stop, database: 
 
 export async function setLegManual(leg: Leg, mode: LegMode, minutes: number, database: TravelDB = db): Promise<void> {
   await writeRows([{ table: "legs", row: { ...leg, mode, minutes, source: "manual", steps: null, polyline: null } }], database);
+}
+
+export async function setLegNote(leg: Leg, note: string | null, database: TravelDB = db): Promise<void> {
+  await writeRows([{ table: "legs", row: { ...leg, note } }], database);
 }
 
 export async function setStay(stop: Stop, stayMinutes: number, database: TravelDB = db): Promise<void> {

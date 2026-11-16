@@ -25,3 +25,23 @@ test("desktop keeps the timeline beside the stop editor and uses a side nav", as
   await nav.getByRole("link", { name: "訂位" }).click();
   await expect(page.getByRole("heading", { name: "訂位與票券" })).toBeVisible();
 });
+
+test("opening a leg keeps its day selected, and its note shows on the timeline", async ({ page }) => {
+  await signIn(page);
+  await createTrip(page, "兩天", "2027-04-01", "2027-04-02");
+  await page.getByRole("button", { name: /Day 2/ }).click();
+  await addStop(page, "乙一");
+  await addStop(page, "乙二");
+  await expect(page.getByRole("button", { name: /Day 2/ })).toHaveAttribute("aria-pressed", "true");
+
+  await page.locator('main a[href*="/legs/"]').first().click();
+  await expect(page.getByRole("heading", { name: "交通方式" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Day 2/ })).toHaveAttribute("aria-pressed", "true");
+
+  await page.getByLabel("交通時間（分鐘）").fill("40");
+  await page.getByLabel("備註").fill("JR 奈良線 2 號月台");
+  await page.getByRole("button", { name: "套用" }).click();
+  await expect(page.getByRole("heading", { name: "交通方式" })).toBeHidden();
+  await expect(page.getByRole("button", { name: /Day 2/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("link", { name: /大眾運輸 40 分.*JR 奈良線 2 號月台/ })).toBeVisible();
+});

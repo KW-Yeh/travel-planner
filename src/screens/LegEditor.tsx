@@ -5,7 +5,7 @@ import type { CompareResponse, Endpoint, RouteResult, RouteStep } from "../../sh
 import { LEG_MODES, type Leg, type LegMode, type Stop } from "../../shared/schema";
 import { formatHhmm, zonedToEpoch } from "../../shared/time";
 import { BackIcon, ModeIcon } from "../components/icons";
-import { setLegManual } from "../data/actions";
+import { setLegManual, setLegNote } from "../data/actions";
 import { MODE_LABEL } from "../data/labels";
 import { useTripBundle, type TripBundle } from "../data/queries";
 import { dayTimeline } from "../data/summary";
@@ -80,6 +80,7 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
   const [minutes, setMinutes] = useState(leg.minutes === null ? "" : String(leg.minutes));
   const [fetched, setFetched] = useState<{ key: string; res: CompareResponse | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState(leg.note ?? "");
   const back = `/trips/${bundle.trip.id}${day ? `?day=${day.id}` : ""}`;
 
   let unavailable: string | null = null;
@@ -128,16 +129,19 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
   const manualValid = minutes !== "" && Number.isInteger(parsed) && parsed >= 0 && parsed <= 48 * 60;
 
   async function apply() {
+    const trimmed = note.trim();
+    const edited: Leg = { ...leg, note: trimmed === "" ? null : trimmed };
     if (isManual) {
       if (!manualValid) {
         setError("請輸入 0 到 2880 之間的整數分鐘。");
         return;
       }
-      await setLegManual(leg, mode, parsed);
+      await setLegManual(edited, mode, parsed);
     } else if (googleOk) {
-      await applyGoogleResult(leg, mode, googleOk, departAt);
+      await applyGoogleResult(edited, mode, googleOk, departAt);
     } else if (leg.source === "google" && leg.mode === mode && leg.minutes !== null) {
-      // Nothing new to apply; keep the stored result.
+      // Keep the stored result; only the note may have changed.
+      if (edited.note !== leg.note) await setLegNote(leg, edited.note);
     } else {
       setError("這個方式目前沒有可用的路線，請改用手動輸入。");
       return;
@@ -258,6 +262,25 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
             />
           </div>
         )}
+
+        <div>
+          <p className="group-caption">
+            <label htmlFor="leg-note">備註</label>
+          </p>
+          <div className="group glass">
+            <textarea
+              id="leg-note"
+              className="textarea"
+              rows={3}
+              maxLength={2000}
+              placeholder="搭乘路線、轉乘站、月台、票價…"
+              value={note}
+              onChange={(e) => {
+                setNote(e.target.value);
+              }}
+            />
+          </div>
+        </div>
 
         {error && (
           <p className="error-text" role="alert">

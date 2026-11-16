@@ -204,7 +204,7 @@
 .legRow {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: stretch;
 }
 .rail {
   width: 48px;
@@ -214,7 +214,7 @@
 }
 .rail span {
   width: 2px;
-  height: 44px;
+  min-height: 44px;
   margin-right: 8px;
   background: #b9c2cc;
 }
@@ -240,6 +240,25 @@
 }
 .legText {
   font-weight: 700;
+}
+.leg:has(.legNote) {
+  flex-wrap: wrap;
+  align-content: center;
+  padding-block: 10px;
+  row-gap: 4px;
+}
+.legNote {
+  flex-basis: 100%;
+  padding-left: 26px;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
 }
 .legDetail {
   flex: 1;

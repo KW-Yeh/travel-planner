@@ -31,6 +31,16 @@ export class TravelDB extends Dexie {
       meta: "key",
     });
     this.version(2).stores({ blobs: "id" });
+    this.version(3)
+      .stores({})
+      .upgrade((tx) =>
+        tx
+          .table("legs")
+          .toCollection()
+          .modify((leg: { note?: string | null }) => {
+            leg.note ??= null;
+          }),
+      );
   }
 
   syncTable(table: SyncTable): Table<AnyRow, string> {

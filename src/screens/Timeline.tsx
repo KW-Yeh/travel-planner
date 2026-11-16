@@ -42,7 +42,7 @@ function legDetail(leg: Leg): string {
   }
 }
 
-function LegRow({ leg, tripId, onCreate }: { leg: Leg | null | undefined; tripId: string; onCreate: () => void }) {
+function LegRow({ leg, tripId, daySearch, onCreate }: { leg: Leg | null | undefined; tripId: string; daySearch: string; onCreate: () => void }) {
   const content = (text: string, detail: string, mode: Leg["mode"]) => (
     <>
       <ModeIcon mode={mode} size={18} />
@@ -57,10 +57,11 @@ function LegRow({ leg, tripId, onCreate }: { leg: Leg | null | undefined; tripId
         <span />
       </span>
       {leg ? (
-        <Link to={`/trips/${tripId}/legs/${leg.id}`} className={styles.leg}>
+        <Link to={`/trips/${tripId}/legs/${leg.id}${daySearch}`} className={styles.leg}>
           {leg.minutes === null
             ? content("交通時間未定", "點此設定", leg.mode)
             : content(`${MODE_SHORT[leg.mode]} ${leg.minutes} 分`, legDetail(leg), leg.mode)}
+          {leg.note && <span className={styles.legNote}>{leg.note}</span>}
         </Link>
       ) : (
         <button type="button" className={styles.leg} onClick={onCreate}>
@@ -176,7 +177,7 @@ export function Timeline({ embedded = false }: { embedded?: boolean }) {
       if (stop) await setStay(stop, s.stayMinutes);
     } else {
       const leg = bundle.legs.find((l) => l.id === s.legId);
-      if (leg && !(await switchLegMode(leg, s.mode))) void navigate(`/trips/${trip.id}/legs/${leg.id}`);
+      if (leg && !(await switchLegMode(leg, s.mode))) void navigate(`/trips/${trip.id}/legs/${leg.id}${daySearch}`);
     }
   }
 
@@ -329,9 +330,10 @@ export function Timeline({ embedded = false }: { embedded?: boolean }) {
                 <LegRow
                   leg={entry.legIn}
                   tripId={trip.id}
+                  daySearch={daySearch}
                   onCreate={() => {
                     const prev = stops[index - 1];
-                    if (prev) void ensureLeg(trip.id, prev, stop).then((leg) => navigate(`/trips/${trip.id}/legs/${leg.id}`));
+                    if (prev) void ensureLeg(trip.id, prev, stop).then((leg) => navigate(`/trips/${trip.id}/legs/${leg.id}${daySearch}`));
                   }}
                 />
               )}
