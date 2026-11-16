@@ -1,0 +1,120 @@
+.header {
+  padding: max(14px, env(safe-area-inset-top)) 16px 10px;
+}
+.header h1 {
+  font-size: 20px;
+}
+.add {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.main {
+  flex: 1;
+  padding: 12px 16px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: rise 0.5s var(--ease-out) both;
+}
+
+.card {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.titles h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.titles p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.code {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 0 12px;
+  border-radius: var(--radius-sm);
+  background: rgb(21 32 43 / 0.05);
+}
+.codeLabel {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+.codeValue {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+
+.notice {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-ok);
+}
+.notice:empty {
+  display: none;
+}
+
+.late {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-danger-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.actions > * {
+  flex: 1 1 140px;
+  font-size: 13px;
+}
+
+.links {
+  display: flex;
+  gap: 16px;
+}
+.links a {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--color-primary);
+}

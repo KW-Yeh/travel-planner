@@ -2,7 +2,9 @@ import { useState, type SubmitEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { STOP_KINDS, type Stop, type StopKind } from "../../shared/schema";
 import { describeDate, formatDuration, formatHhmm } from "../../shared/time";
+import { BookingSection, type BookingDraft } from "../components/BookingSection";
 import { deleteStop, saveStop, type Placement, type StopInput } from "../data/actions";
+import { safeUrl, saveBooking, type ReservationInput } from "../data/bookings";
 import { KIND_DEFAULT_STAY, KIND_LABEL, STAY_OPTIONS } from "../data/labels";
 import { stopsOfDay, useTripBundle, type TripBundle } from "../data/queries";
 import { dayTimeline } from "../data/summary";
@@ -16,9 +18,23 @@ function stayOptions(current: number): number[] {
   return STAY_OPTIONS.includes(current) ? STAY_OPTIONS : [...STAY_OPTIONS, current].sort((a, b) => a - b);
 }
 
-function Editor({ bundle, stop, initialDayId }: { bundle: TripBundle; stop: Stop | null; initialDayId: string | null }) {
+type EditorProps = { bundle: TripBundle; stop: Stop | null; initialDayId: string | null; startWithBooking: boolean };
+
+function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
   const navigate = useNavigate();
   const { trip } = bundle;
+  const reservation = stop ? (bundle.reservations.find((r) => r.stop_id === stop.id) ?? null) : null;
+  const existingFiles = reservation ? bundle.attachments.filter((a) => a.reservation_id === reservation.id) : [];
+  const [booking, setBooking] = useState<BookingDraft>({
+    enabled: reservation !== null || startWithBooking,
+    time: reservation?.time ?? "",
+    party: String(reservation?.party_size ?? trip.party_size),
+    code: reservation?.code ?? "",
+    url: reservation?.url ?? "",
+    status: reservation?.status ?? "confirmed",
+    added: [],
+    removed: [],
+  });
   const [name, setName] = useState(stop?.name ?? "");
   const [kind, setKind] = useState<StopKind>(stop?.kind ?? "sight");
   const [dayId, setDayId] = useState<string | null>(stop ? stop.day_id : initialDayId);
@@ -43,6 +59,26 @@ function Editor({ bundle, stop, initialDayId }: { bundle: TripBundle; stop: Stop
       setError("請輸入地點名稱。");
       return;
     }
+    let reservationInput: ReservationInput | null = null;
+    if (booking.enabled) {
+      const url = booking.url.trim() ? safeUrl(booking.url) : null;
+      if (booking.url.trim() && !url) {
+        setError("確認連結需要是 http 或 https 開頭的網址。");
+        return;
+      }
+      const party = booking.party ? Number(booking.party) : null;
+      if (party !== null && (!Number.isInteger(party) || party < 1 || party > 999)) {
+        setError("人數需介於 1 到 999。");
+        return;
+      }
+      reservationInput = {
+        time: booking.time || null,
+        party_size: party,
+        code: booking.code.trim() || null,
+        url,
+        status: booking.status,
+      };
+    }
     const input: StopInput = {
       name: name.trim(),
       kind,
@@ -61,7 +97,10 @@ function Editor({ bundle, stop, initialDayId }: { bundle: TripBundle; stop: Stop
     else if (placement === START) where = { dayId, at: "start" };
     else if (placement === END || placement === KEEP) where = { dayId, at: "end" };
     else where = { dayId, at: { after: placement } };
-    await saveStop(trip.id, stop?.id ?? null, input, where);
+    const savedId = await saveStop(trip.id, stop?.id ?? null, input, where);
+    if (reservationInput || reservation) {
+      await saveBooking(trip.id, savedId, reservation, reservationInput, booking.added, booking.removed);
+    }
     void navigate(back, { replace: true });
   }
 
@@ -215,6 +254,8 @@ function Editor({ bundle, stop, initialDayId }: { bundle: TripBundle; stop: Stop
           </div>
         )}
 
+        <BookingSection draft={booking} existing={existingFiles} onChange={setBooking} />
+
         <div className="field">
           <label htmlFor="stop-note" className="field-label">
             備註
@@ -274,5 +315,13 @@ export function StopEditor() {
   const stop = stopId ? (bundle.stops.find((s) => s.id === stopId) ?? null) : null;
   if (stopId && !stop) return <p className="empty">找不到這個地點，可能已被刪除。</p>;
   const initialDayId = selectDay(bundle, params.get("day"))?.id ?? null;
-  return <Editor key={stop?.id ?? "new"} bundle={bundle} stop={stop} initialDayId={initialDayId} />;
+  return (
+    <Editor
+      key={stop?.id ?? "new"}
+      bundle={bundle}
+      stop={stop}
+      initialDayId={initialDayId}
+      startWithBooking={params.get("booking") === "1"}
+    />
+  );
 }

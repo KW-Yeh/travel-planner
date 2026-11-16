@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { attachmentRoutes } from "./attachments/routes";
 import { authRoutes } from "./auth/routes";
 import { apiError } from "./http";
 import { requireSession, sameOrigin } from "./middleware";
@@ -12,6 +13,7 @@ app.use("*", sameOrigin, requireSession);
 app.get("/health", (c) => c.json({ ok: true }));
 app.route("/auth", authRoutes);
 app.route("/sync", syncRoutes);
+app.route("/attachments", attachmentRoutes);
 
 app.notFound((c) => apiError(c, 404, "not_found"));
 

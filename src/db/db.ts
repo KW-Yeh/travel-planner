@@ -3,6 +3,8 @@ import type { AnyRow, Attachment, Day, Leg, Reservation, Stop, SyncTable, Trip }
 
 export type OutboxEntry = { table: SyncTable; id: string; row: AnyRow; queued_at: number };
 export type MetaEntry = { key: string; value: unknown };
+/** Attachment file contents, kept locally so they open offline. */
+export type BlobEntry = { id: string; blob: Blob };
 
 export class TravelDB extends Dexie {
   declare trips: EntityTable<Trip, "id">;
@@ -13,6 +15,7 @@ export class TravelDB extends Dexie {
   declare attachments: EntityTable<Attachment, "id">;
   declare outbox: Table<OutboxEntry, [SyncTable, string]>;
   declare meta: EntityTable<MetaEntry, "key">;
+  declare blobs: EntityTable<BlobEntry, "id">;
 
   constructor(name = "travel-planner") {
     super(name);
@@ -26,6 +29,7 @@ export class TravelDB extends Dexie {
       outbox: "[table+id], queued_at",
       meta: "key",
     });
+    this.version(2).stores({ blobs: "id" });
   }
 
   syncTable(table: SyncTable): Table<AnyRow, string> {

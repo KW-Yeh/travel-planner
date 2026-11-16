@@ -6,18 +6,22 @@ import {
   type SyncChange,
   type SyncTable,
 } from "../../shared/schema";
-import { ApiError, NetworkError, apiRequest } from "../api/client";
+import { ApiError, NetworkError, apiDownload, apiRequest, apiUpload } from "../api/client";
 import type { OutboxEntry, TravelDB } from "../db/db";
 import { onLocalWrite } from "../db/mutate";
 
 export interface SyncTransport {
   push(changes: SyncChange[]): Promise<PushResponse>;
   pull(since: number): Promise<PullResponse>;
+  upload(id: string, blob: Blob, contentType: string): Promise<void>;
+  download(id: string): Promise<Blob>;
 }
 
 export const httpTransport: SyncTransport = {
   push: (changes) => apiRequest<PushResponse>("/api/sync/push", { json: { changes } }),
   pull: (since) => apiRequest<PullResponse>(`/api/sync/pull?since=${since}`),
+  upload: (id, blob, contentType) => apiUpload(`/api/attachments/${id}`, blob, contentType),
+  download: (id) => apiDownload(`/api/attachments/${id}`),
 };
 
 export type SyncPhase = "idle" | "syncing" | "offline" | "error" | "unauthorized";
@@ -132,7 +136,9 @@ export class SyncEngine {
     this.setStatus({ phase: "syncing" });
     try {
       await this.pushAll();
+      await this.uploadFiles();
       await this.pullAll();
+      await this.downloadFiles();
       const lastSyncAt = Date.now();
       await this.db.setMeta(LAST_SYNC_KEY, lastSyncAt);
       this.setStatus({ phase: "idle", lastSyncAt });
@@ -187,6 +193,37 @@ export class SyncEngine {
       }
     });
     return progressed;
+  }
+
+  /** Sends local files whose attachment row the server already has. */
+  private async uploadFiles(): Promise<void> {
+    const waiting = (await this.db.attachments.toArray()).filter((a) => a.deleted === 0 && a.uploaded === 0);
+    for (const att of waiting) {
+      if (await this.db.outbox.get(key("attachments", att.id))) continue;
+      const local = await this.db.blobs.get(att.id);
+      if (!local) continue;
+      try {
+        await this.transport.upload(att.id, local.blob, att.content_type);
+      } catch (error) {
+        // The row may not have reached the server yet; try again next cycle.
+        if (error instanceof ApiError && error.status === 404) continue;
+        throw error;
+      }
+    }
+  }
+
+  /** Keeps every uploaded attachment available offline. */
+  private async downloadFiles(): Promise<void> {
+    const uploaded = (await this.db.attachments.toArray()).filter((a) => a.deleted === 0 && a.uploaded === 1);
+    for (const att of uploaded) {
+      if (await this.db.blobs.get(att.id)) continue;
+      try {
+        await this.db.blobs.put({ id: att.id, blob: await this.transport.download(att.id) });
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 404) continue;
+        throw error;
+      }
+    }
   }
 
   private async pullAll(): Promise<void> {

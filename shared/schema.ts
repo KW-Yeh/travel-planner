@@ -77,13 +77,20 @@ export const ReservationRow = z.object({
   status: z.enum(RESERVATION_STATUSES),
 });
 
+/**
+ * Attachments are served from the app's own origin, so only inert types are allowed:
+ * an uploaded HTML or SVG file would otherwise run script inside the app.
+ */
+export const ATTACHMENT_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"] as const;
+export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
 /** `uploaded` is owned by the server (set when R2 receives the file); clients send it but it is ignored. */
 export const AttachmentRow = z.object({
   ...base,
   reservation_id: id,
   filename: z.string().min(1).max(255),
-  content_type: z.string().min(1).max(100),
-  size: z.number().int().min(0),
+  content_type: z.enum(ATTACHMENT_TYPES),
+  size: z.number().int().min(1).max(MAX_ATTACHMENT_BYTES),
   uploaded: z.union([z.literal(0), z.literal(1)]),
 });
 

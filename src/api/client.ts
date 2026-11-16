@@ -51,3 +51,24 @@ export async function apiRequest<T = undefined>(path: string, init: { method?: s
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
 }
+
+export async function apiUpload(path: string, blob: Blob, contentType: string): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(path, { method: "PUT", credentials: "same-origin", headers: { "Content-Type": contentType }, body: blob });
+  } catch (error) {
+    throw new NetworkError(error);
+  }
+  if (!res.ok) throw await toApiError(res);
+}
+
+export async function apiDownload(path: string): Promise<Blob> {
+  let res: Response;
+  try {
+    res = await fetch(path, { credentials: "same-origin" });
+  } catch (error) {
+    throw new NetworkError(error);
+  }
+  if (!res.ok) throw await toApiError(res);
+  return res.blob();
+}

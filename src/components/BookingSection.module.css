@@ -1,0 +1,73 @@
+.section {
+  padding: 12px 14px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap-min);
+}
+.toggle label {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+}
+.toggle input {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--color-primary);
+}
+
+.files {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.files li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fileName {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: rgb(21 32 43 / 0.05);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.attach {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #8793a0;
+  border-radius: var(--radius-sm);
+  background: rgb(21 32 43 / 0.05);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.attach:focus-within {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}

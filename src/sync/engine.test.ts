@@ -6,6 +6,7 @@ import {
   type AnyRow,
   type PullResponse,
   type PushResponse,
+  type Attachment,
   type SyncChange,
   type Trip,
 } from "../../shared/schema";
@@ -18,8 +19,23 @@ import { SyncEngine, type SyncTransport } from "./engine";
 /** In-memory stand-in for the Worker sync endpoints, following the same rules. */
 class FakeServer implements SyncTransport {
   rows = new Map<string, { change: SyncChange; version: number }>();
+  files = new Map<string, Blob>();
   version = 0;
   pushes = 0;
+
+  upload(id: string, blob: Blob): Promise<void> {
+    const entry = this.rows.get(`attachments/${id}`);
+    if (!entry) return Promise.reject(new ApiError(404, "not_found"));
+    this.files.set(id, blob);
+    entry.change = { table: "attachments", row: { ...(entry.change.row as Attachment), uploaded: 1 } };
+    entry.version = ++this.version;
+    return Promise.resolve();
+  }
+
+  download(id: string): Promise<Blob> {
+    const blob = this.files.get(id);
+    return blob ? Promise.resolve(blob) : Promise.reject(new ApiError(404, "not_found"));
+  }
 
   push(changes: SyncChange[]): Promise<PushResponse> {
     this.pushes++;
@@ -50,6 +66,12 @@ class FakeServer implements SyncTransport {
     });
   }
 }
+
+/** For transports in tests that never deal with files. */
+const noFiles = {
+  upload: () => Promise.resolve(),
+  download: () => Promise.reject(new ApiError(404, "not_found")),
+};
 
 const databases: TravelDB[] = [];
 function freshDb(): TravelDB {
@@ -155,6 +177,7 @@ describe("sync engine", () => {
     await writeRows([{ table: "trips", row: t }], database);
 
     const racing: SyncTransport = {
+      ...noFiles,
       push: async (changes) => {
         await writeRows([{ table: "trips", row: { ...t, name: "上傳中又改" } }], database);
         return server.push(changes);
@@ -178,7 +201,7 @@ describe("sync engine", () => {
     await server.push([{ table: "trips", row: remote }]);
     await writeRows([{ table: "trips", row: { ...t, name: "local" } }], database);
 
-    const pullOnly: SyncTransport = { push: () => Promise.reject(new NetworkError("down")), pull: (s) => server.pull(s) };
+    const pullOnly: SyncTransport = { ...noFiles, push: () => Promise.reject(new NetworkError("down")), pull: (s) => server.pull(s) };
     const engine = new SyncEngine(database, pullOnly);
     await engine.syncNow();
     expect((await database.trips.get(t.id))?.name).toBe("local");
@@ -188,6 +211,7 @@ describe("sync engine", () => {
     const database = freshDb();
     await writeRows([{ table: "trips", row: trip() }], database);
     const down: SyncTransport = {
+      ...noFiles,
       push: () => Promise.reject(new NetworkError(new TypeError("Failed to fetch"))),
       pull: () => Promise.reject(new NetworkError(new TypeError("Failed to fetch"))),
     };
@@ -205,6 +229,7 @@ describe("sync engine", () => {
     await writeRows([{ table: "trips", row: trip() }], database);
     const onUnauthorized = vi.fn();
     const expired: SyncTransport = {
+      ...noFiles,
       push: () => Promise.reject(new ApiError(401, "unauthorized")),
       pull: () => Promise.reject(new ApiError(401, "unauthorized")),
     };
@@ -239,6 +264,30 @@ describe("sync engine", () => {
     await server.push([{ table: "trips", row: { ...t, deleted: 1, updated_at: 2 } }]);
     await new SyncEngine(database, server).syncNow();
     expect((await database.trips.get(t.id))?.deleted).toBe(1);
+  });
+
+  it("uploads a file once its row is synced, and another device downloads it for offline use", async () => {
+    const server = new FakeServer();
+    const a = freshDb();
+    const b = freshDb();
+    const att: Draft<"attachments"> = {
+      id: newId(),
+      reservation_id: newId(),
+      filename: "ticket.png",
+      content_type: "image/png",
+      size: 3,
+      uploaded: 0,
+    };
+    await writeRows([{ table: "attachments", row: att }], a);
+    await a.blobs.put({ id: att.id, blob: new Blob(["png"], { type: "image/png" }) });
+
+    await new SyncEngine(a, server).syncNow();
+    expect(server.files.has(att.id)).toBe(true);
+    expect((await a.attachments.get(att.id))?.uploaded).toBe(1);
+
+    await new SyncEngine(b, server).syncNow();
+    const copy = await b.blobs.get(att.id);
+    expect(copy?.blob.size).toBe(3);
   });
 
   it("generates ids the server schema accepts", () => {

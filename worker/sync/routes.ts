@@ -11,6 +11,7 @@ import {
   type SyncChange,
   type SyncTable,
 } from "../../shared/schema";
+import { purgeDeletedAttachments } from "../attachments/routes";
 import { apiError, readJson } from "../http";
 import type { AppEnv } from "../types";
 
@@ -120,9 +121,11 @@ syncRoutes.post("/push", async (c) => {
 
     const results = await db.batch(statements);
     const staleByTable = new Map<SyncTable, string[]>();
+    const deletedAttachments: string[] = [];
     valid.forEach(({ table, row }, i) => {
       if ((results[i + 1]?.meta.changes ?? 0) > 0) {
         result.applied.push({ table, id: row.id });
+        if (table === "attachments" && row.deleted === 1) deletedAttachments.push(row.id);
       } else {
         staleByTable.set(table, [...(staleByTable.get(table) ?? []), row.id]);
       }
@@ -141,6 +144,7 @@ syncRoutes.post("/push", async (c) => {
       // The id exists but belongs to another user: never reveal it, just refuse.
       for (const id of ids) if (!found.has(id)) result.rejected.push({ table, id, reason: "conflict" });
     }
+    c.executionCtx.waitUntil(purgeDeletedAttachments(c.env, userId, deletedAttachments));
   }
 
   return c.json(result);

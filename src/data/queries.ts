@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { byPosition } from "../../shared/position";
-import type { Day, Leg, Reservation, Stop, Trip } from "../../shared/schema";
+import type { Attachment, Day, Leg, Reservation, Stop, Trip } from "../../shared/schema";
 import { db } from "../db/db";
 
 const live = <T extends { deleted: 0 | 1 }>(rows: T[]) => rows.filter((r) => r.deleted === 0);
@@ -15,6 +15,7 @@ export type TripBundle = {
   stops: Stop[];
   legs: Leg[];
   reservations: Reservation[];
+  attachments: Attachment[];
 };
 
 /** Everything under one trip, live. `null` once loaded if the trip does not exist (or was deleted). */
@@ -29,12 +30,18 @@ export function useTripBundle(tripId: string | undefined): TripBundle | null | u
       db.legs.where("trip_id").equals(tripId).toArray(),
       db.reservations.where("trip_id").equals(tripId).toArray(),
     ]);
+    const liveReservations = live(reservations);
+    const attachments = await db.attachments
+      .where("reservation_id")
+      .anyOf(liveReservations.map((r) => r.id))
+      .toArray();
     return {
       trip,
       days: live(days).sort((a, b) => a.date.localeCompare(b.date)),
       stops: live(stops).sort(byPosition),
       legs: live(legs),
-      reservations: live(reservations),
+      reservations: liveReservations,
+      attachments: live(attachments),
     };
   }, [tripId]);
 }
@@ -59,6 +66,7 @@ export function useAllTripBundles(): TripBundle[] | undefined {
         .sort(byPosition),
       legs: live(legs).filter((l) => l.trip_id === trip.id),
       reservations: live(reservations).filter((r) => r.trip_id === trip.id),
+      attachments: [],
     }));
   }, []);
 }

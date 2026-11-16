@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import type { MeResponse } from "../shared/api";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import { Bookings } from "./screens/Bookings";
 import { ComingSoon } from "./screens/ComingSoon";
 import { LegEditor } from "./screens/LegEditor";
 import { Login } from "./screens/Login";
@@ -22,7 +23,7 @@ function SignedInRoutes({ user }: { user: MeResponse }) {
       <Route path="/trips/:tripId" element={<TripLayout />}>
         <Route index element={<Timeline />} />
         <Route path="map" element={<ComingSoon title="地圖" />} />
-        <Route path="bookings" element={<ComingSoon title="訂位與票券" />} />
+        <Route path="bookings" element={<Bookings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
