@@ -1,0 +1,57 @@
+.desktop {
+  display: flex;
+  min-height: 100dvh;
+}
+
+.column {
+  min-width: 0;
+}
+.desktop > .column {
+  width: clamp(360px, 32vw, 480px);
+  flex: none;
+  height: 100dvh;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-line);
+}
+
+.pane {
+  flex: 1;
+  min-width: 0;
+  height: 100dvh;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+}
+
+.wide {
+  flex: 1;
+  min-width: 0;
+}
+
+.tablet {
+  display: grid;
+  grid-template-columns: minmax(360px, 420px) minmax(0, 1fr);
+}
+.tabletMap {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  padding: 16px 16px calc(92px + env(safe-area-inset-bottom)) 0;
+  box-sizing: border-box;
+}
+
+/* Screens rendered inside a desktop region drop the phone column width. */
+.pane :global(.screen),
+.wide :global(.screen) {
+  max-width: none;
+  min-height: 100%;
+}
+.pane :global(.form) {
+  width: 100%;
+  max-width: 600px;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+.column :global(.screen) {
+  max-width: none;
+}

@@ -129,7 +129,7 @@ export function Trips({ user }: { user: MeResponse }) {
   }
 
   return (
-    <div className="screen">
+    <div className={`screen ${styles.screen}`}>
       <header className={styles.header}>
         <h1>我的旅程</h1>
         <div className={styles.headerActions}>

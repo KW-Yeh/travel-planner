@@ -121,3 +121,75 @@
     animation: none;
   }
 }
+
+.dayMap {
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+.dayMap .map {
+  flex: 1;
+  height: auto;
+  margin: 0;
+  border-radius: var(--radius-lg);
+}
+.mapNote {
+  flex: 1;
+  margin: 0;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1.5px dashed var(--color-line);
+  border-radius: var(--radius-lg);
+  background: rgb(255 255 255 / 0.4);
+}
+
+@media (min-width: 1024px) {
+  .view {
+    height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(340px, 400px) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+  .view > header {
+    grid-column: 1 / -1;
+  }
+  .back {
+    display: none;
+  }
+  .view > .days {
+    grid-column: 1;
+    flex-wrap: wrap;
+  }
+  .view > .panel {
+    grid-column: 1;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+  .view > .map,
+  .view > .fallback,
+  .view > :global(.hint) {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    align-self: stretch;
+  }
+  .view > .map {
+    height: auto;
+    margin: 16px 16px 16px 0;
+    border-radius: var(--radius-lg);
+  }
+  .view > .fallback {
+    margin: 16px 16px 16px 0;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px dashed var(--color-line);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 0.4);
+  }
+}

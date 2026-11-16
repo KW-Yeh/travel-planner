@@ -323,6 +323,26 @@
   color: var(--color-ink);
   outline: none;
 }
+@media (min-width: 1024px) {
+  /* Centred dialog: inset + auto margins centre it without touching the transform vaul animates. */
+  .drawer {
+    top: 0;
+    width: 440px;
+    height: fit-content;
+    max-height: 80dvh;
+    margin: auto;
+    padding-bottom: 20px;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgb(21 32 43 / 0.25);
+  }
+  .drawer-handle {
+    display: none;
+  }
+  /* vaul extends a bottom sheet below the screen edge; a centred dialog has no edge to cover. */
+  .drawer::after {
+    display: none;
+  }
+}
 .drawer-handle {
   align-self: center;
   width: 40px;

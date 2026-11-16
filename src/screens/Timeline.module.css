@@ -276,3 +276,8 @@
   flex-direction: column;
   gap: 8px;
 }
+
+.card[aria-current="page"] {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary), var(--glass-shadow);
+}

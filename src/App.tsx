@@ -17,11 +17,11 @@ function SignedInRoutes({ user }: { user: MeResponse }) {
       <Route path="/" element={<Trips user={user} />} />
       <Route path="/trips/new" element={<TripForm />} />
       <Route path="/trips/:tripId/edit" element={<TripForm />} />
-      <Route path="/trips/:tripId/stops/new" element={<StopEditor />} />
-      <Route path="/trips/:tripId/stops/:stopId" element={<StopEditor />} />
-      <Route path="/trips/:tripId/legs/:legId" element={<LegEditor />} />
       <Route path="/trips/:tripId" element={<TripLayout />}>
         <Route index element={<Timeline />} />
+        <Route path="stops/new" element={<StopEditor />} />
+        <Route path="stops/:stopId" element={<StopEditor />} />
+        <Route path="legs/:legId" element={<LegEditor />} />
         <Route path="map" element={<MapView />} />
         <Route path="bookings" element={<Bookings />} />
       </Route>

@@ -123,24 +123,41 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
   return <div ref={container} className={styles.map} role="region" aria-label="行程地圖" />;
 }
 
+function useFallback(rows: Row[]): string | null {
+  const config = useMapsConfig();
+  const online = useOnline();
+  const located = rows.filter((r) => hasCoords(r.stop)).length;
+  if (config && !config.mapsBrowserKey) return "尚未設定 Google 地圖金鑰，先以清單顯示。";
+  if (!online) return "離線中，地圖無法載入；清單與已排好的時間仍可查看。";
+  if (rows.length > 0 && located === 0) return "這些地點都還沒有座標。到地點裡用搜尋選取，就會出現在地圖上。";
+  return null;
+}
+
+/** The selected day's route, shown beside the timeline on wide screens. */
+export function DayMap({ bundle, day, selected, onSelect }: { bundle: TripBundle; day: Day | null; selected: string | null; onSelect: (stopId: string) => void }) {
+  const config = useMapsConfig();
+  const rows = useMemo(() => rowsFor(bundle, day ? [day] : []), [bundle, day]);
+  const fallback = useFallback(rows);
+  return (
+    <div className={styles.dayMap}>
+      {config?.mapsBrowserKey && !fallback && <GoogleMap apiKey={config.mapsBrowserKey} mapId={config.mapId} rows={rows} selected={selected} onSelect={onSelect} />}
+      {fallback && <p className={`hint ${styles.mapNote}`}>{fallback}</p>}
+    </div>
+  );
+}
+
 export function MapView() {
   const { bundle, day, search } = useTripContext();
   const config = useMapsConfig();
-  const online = useOnline();
   const [scope, setScope] = useState<string>(day?.id ?? ALL);
   const [selected, setSelected] = useState<string | null>(null);
   const rows = useMemo(() => rowsFor(bundle, scope === ALL ? bundle.days : bundle.days.filter((d) => d.id === scope)), [bundle, scope]);
-
-  const located = rows.filter((r) => hasCoords(r.stop)).length;
-  let fallback: string | null = null;
-  if (config && !config.mapsBrowserKey) fallback = "尚未設定 Google 地圖金鑰，先以清單顯示。";
-  else if (!online) fallback = "離線中，地圖無法載入；清單與已排好的時間仍可查看。";
-  else if (rows.length > 0 && located === 0) fallback = "這些地點都還沒有座標。到地點裡用搜尋選取，就會出現在地圖上。";
+  const fallback = useFallback(rows);
 
   return (
-    <div className="screen">
+    <div className={`screen ${styles.view}`}>
       <header className="topbar glass">
-        <Link to={`/trips/${bundle.trip.id}${search}`} className="icon-btn" aria-label="返回行程">
+        <Link to={`/trips/${bundle.trip.id}${search}`} className={`icon-btn ${styles.back}`} aria-label="返回行程">
           <BackIcon />
         </Link>
         <div className="topbar-titles">

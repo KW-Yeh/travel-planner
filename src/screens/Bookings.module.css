@@ -118,3 +118,14 @@
   text-decoration: none;
   color: var(--color-primary);
 }
+
+@media (min-width: 768px) {
+  .group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    align-items: start;
+  }
+  .group > h2 {
+    grid-column: 1 / -1;
+  }
+}

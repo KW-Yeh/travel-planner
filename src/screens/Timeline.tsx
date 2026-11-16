@@ -1,5 +1,5 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useMatch, useNavigate, useSearchParams } from "react-router";
 import type { Leg, Reservation, Stop } from "../../shared/schema";
 import { dayOffset, describeDate, formatDuration, formatHhmm } from "../../shared/time";
 import { isDayOrigin, type Conflict, type Suggestion, type TimelineEntry } from "../../shared/timeline";
@@ -151,7 +151,8 @@ function StopCard({ entry, index, reservations, stops, onApply }: StopCardProps)
 
 type Drag = { id: string; from: number; startY: number; dy: number; target: number; height: number };
 
-export function Timeline() {
+/** `embedded`: the desktop shell already shows the trip's name and navigation. */
+export function Timeline({ embedded = false }: { embedded?: boolean }) {
   const { bundle, day, search } = useTripContext();
   const { trip } = bundle;
   const navigate = useNavigate();
@@ -159,6 +160,7 @@ export function Timeline() {
   const [reorder, setReorder] = useState(false);
   const [drag, setDrag] = useState<Drag | null>(null);
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
+  const openStopId = useMatch("/trips/:tripId/stops/:stopId")?.params.stopId;
 
   const stops = day ? stopsOfDay(bundle, day.id) : [];
   const unscheduled = stopsOfDay(bundle, null);
@@ -216,18 +218,20 @@ export function Timeline() {
 
   return (
     <div className="screen">
-      <header className="topbar glass">
-        <Link to="/" className="icon-btn" aria-label="返回旅程列表">
-          <BackIcon />
-        </Link>
-        <div className="topbar-titles">
-          <h1>{trip.name}</h1>
-          <p>{tripDateText(trip)}</p>
-        </div>
-        <Link to={`/trips/${trip.id}/edit`} className="icon-btn" aria-label="編輯旅程">
-          <EditIcon />
-        </Link>
-      </header>
+      {!embedded && (
+        <header className="topbar glass">
+          <Link to="/" className="icon-btn" aria-label="返回旅程列表">
+            <BackIcon />
+          </Link>
+          <div className="topbar-titles">
+            <h1>{trip.name}</h1>
+            <p>{tripDateText(trip)}</p>
+          </div>
+          <Link to={`/trips/${trip.id}/edit`} className="icon-btn" aria-label="編輯旅程">
+            <EditIcon />
+          </Link>
+        </header>
+      )}
 
       {bundle.days.length > 0 && (
         <div className={`${styles.days} glass`} role="group" aria-label="選擇日期">
@@ -381,6 +385,7 @@ export function Timeline() {
                 ) : (
                   <Link
                     to={`/trips/${trip.id}/stops/${stop.id}${daySearch}`}
+                    aria-current={openStopId === stop.id ? "page" : undefined}
                     className={`${styles.card} card card-link glass ${danger ? styles.cardDanger : ""}`}
                   >
                     {card}
