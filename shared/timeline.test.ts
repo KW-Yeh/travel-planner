@@ -112,11 +112,37 @@ describe("computeTimeline", () => {
     expect(t.entries.map((e) => hhmm(e.arrival))).toEqual(["09:12", "09:20", "12:02", "14:27"]);
   });
 
-  it("starts the day at the day's departure time and ignores the first stop's stay", () => {
-    const a = stop("hotel", 600);
+  it("leaves a lodging first stop at the day's departure time, ignoring its stay", () => {
+    const a = stop("hotel", 600, { kind: "lodging" });
     const b = stop("b", 30);
     const t = computeTimeline({ departTime: "08:00", stops: [a, b], legs: [leg(a, b, 10)], reservations: [] });
     expect(t.entries.map((e) => hhmm(e.arrival))).toEqual(["08:00", "08:10"]);
+  });
+
+  it("arrives at a non-lodging first stop at the day's departure time and counts its stay", () => {
+    const a = stop("temple", 90);
+    const b = stop("b", 30);
+    const t = computeTimeline({ departTime: "08:00", stops: [a, b], legs: [leg(a, b, 10)], reservations: [] });
+    expect(t.entries.map((e) => [hhmm(e.arrival), hhmm(e.departure)])).toEqual([
+      ["08:00", "09:30"],
+      ["09:40", "10:10"],
+    ]);
+  });
+
+  it("can suggest shortening a non-lodging first stop", () => {
+    const a = stop("temple", 120);
+    const b = stop("lunch", 60);
+    const t = computeTimeline({
+      departTime: "09:00",
+      stops: [a, b],
+      legs: [leg(a, b, 20)],
+      reservations: [reservation(b, "11:00")],
+    });
+    expect(t.entries[1]?.conflicts[0]).toMatchObject({
+      kind: "late_for_reservation",
+      lateBy: 20,
+      suggestions: [{ kind: "shorten_stay", stopId: a.id, stayMinutes: 90, byMinutes: 30 }],
+    });
   });
 
   it("does not push a fixed-time stop; earlier arrival becomes waiting time", () => {

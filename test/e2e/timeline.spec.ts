@@ -8,7 +8,7 @@ test("builds a day, pushes times on change and flags a fixed time it cannot reac
   await expect(page.getByRole("button", { name: /Day 3/ })).toBeVisible();
 
   await page.getByLabel("當日出發時間").fill("09:12");
-  await addStop(page, "京都車站", { kind: "交通" });
+  await addStop(page, "京都車站", { kind: "交通", stay: "不停留" });
   await addStop(page, "伏見稻荷大社", { stay: "1 小時 45 分" });
   await addStop(page, "清水寺", { stay: "2 小時" });
 
@@ -39,7 +39,7 @@ test("reorders stops and restores a leg's time when moved back", async ({ page }
   for (const name of ["甲", "乙", "丙"]) await addStop(page, name, { stay: "30 分" });
   await setLegMinutes(page, 0, 10);
   await setLegMinutes(page, 1, 20);
-  await expect.poll(() => shownTimes(page)).toEqual(["09:00", "09:10", "10:00"]);
+  await expect.poll(() => shownTimes(page)).toEqual(["09:00", "09:40", "10:30"]);
 
   await page.getByRole("button", { name: "排序" }).click();
   await page.getByRole("button", { name: "甲 下移" }).click();
@@ -49,7 +49,7 @@ test("reorders stops and restores a leg's time when moved back", async ({ page }
   await page.getByRole("button", { name: "排序" }).click();
   await page.getByRole("button", { name: "甲 上移" }).click();
   await page.getByRole("button", { name: "完成" }).click();
-  await expect.poll(() => shownTimes(page)).toEqual(["09:00", "09:10", "10:00"]);
+  await expect.poll(() => shownTimes(page)).toEqual(["09:00", "09:40", "10:30"]);
 });
 
 test("a trip created on one device appears on another", async ({ browser }) => {

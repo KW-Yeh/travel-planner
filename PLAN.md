@@ -236,7 +236,7 @@ Session cookie：`__Host-tp_session=<token>.<hmac>`，`HttpOnly; Secure; SameSit
 
 輸入一天的 Day、依 `position` 排序的 Stops、Legs、Reservations；輸出每站的 `arrival`、`departure`（距當日 00:00 的分鐘數，可超過 1440 顯示「+1」）與衝突清單。純函式、不碰 IO。
 
-1. 第一站：`departure = day.depart_time`（設計稿的「起點 · 出發」）。
+1. 第一站：`arrival = day.depart_time`。住宿類（設計稿的「起點 · 出發」）`departure = day.depart_time`；其他類型 `departure = arrival + stay_minutes`。
 2. 其他站：`arrival = 前一站 departure + leg.minutes`；`departure = arrival + stay_minutes`。
 3. `arrival_mode = 'fixed'`：
    - 推算抵達 ≤ 固定時間 → 抵達 = 固定時間，中間顯示「等待 N 分」；

@@ -37,6 +37,11 @@ export type TimelineInput = {
 export const SUGGEST_MIN_STAY = 30;
 export const SUGGEST_STEP = 15;
 
+/** A lodging first stop is where the day starts from, so the day's departure time is when you leave it. */
+export function isDayOrigin(stop: Stop, index: number): boolean {
+  return index === 0 && stop.kind === "lodging";
+}
+
 export const pairKey = (from: string, to: string) => `${from}>${to}`;
 
 export function liveLegsByPair(legs: Leg[]): Map<string, Leg> {
@@ -64,7 +69,8 @@ export function computeTimeline({ departTime, stops, legs, reservations, alterna
     const floor = anchor;
     if (i === 0) {
       const start = parseHhmm(departTime);
-      entries.push({ stop, arrival: start, departure: start, waitMinutes: 0, conflicts });
+      const departure = isDayOrigin(stop, i) ? start : start + stop.stay_minutes;
+      entries.push({ stop, arrival: start, departure, waitMinutes: 0, conflicts });
       checkReservations(stop, start, i, floor);
       return;
     }
@@ -111,9 +117,9 @@ export function computeTimeline({ departTime, stops, legs, reservations, alterna
   function suggest(index: number, lateBy: number, floor: number): Suggestion[] {
     const out: Suggestion[] = [];
     const cut = Math.ceil(lateBy / SUGGEST_STEP) * SUGGEST_STEP;
-    for (let j = index - 1; j >= Math.max(floor, 1); j--) {
+    for (let j = index - 1; j >= floor; j--) {
       const s = stops[j];
-      if (s && s.stay_minutes >= SUGGEST_MIN_STAY && s.stay_minutes - cut >= SUGGEST_STEP) {
+      if (s && !isDayOrigin(s, j) && s.stay_minutes >= SUGGEST_MIN_STAY && s.stay_minutes - cut >= SUGGEST_STEP) {
         out.push({ kind: "shorten_stay", stopId: s.id, stayMinutes: s.stay_minutes - cut, byMinutes: cut });
         break;
       }

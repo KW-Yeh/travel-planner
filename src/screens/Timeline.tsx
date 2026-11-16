@@ -2,7 +2,7 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router";
 import type { Leg, Reservation, Stop } from "../../shared/schema";
 import { dayOffset, describeDate, formatDuration, formatHhmm } from "../../shared/time";
-import type { Conflict, Suggestion, TimelineEntry } from "../../shared/timeline";
+import { isDayOrigin, type Conflict, type Suggestion, type TimelineEntry } from "../../shared/timeline";
 import { BackIcon, ChevronIcon, DownIcon, EditIcon, GripIcon, ModeIcon, PlusIcon, UpIcon, WarningIcon } from "../components/icons";
 import { ensureLeg, moveStop, setDayDepart, setStay } from "../data/actions";
 import { KIND_LABEL, MODE_SHORT } from "../data/labels";
@@ -103,8 +103,9 @@ type StopCardProps = {
 function StopCard({ entry, index, reservations, stops, onApply }: StopCardProps) {
   const { stop, departure, waitMinutes, conflicts } = entry;
   const sub: string[] = [];
-  if (index === 0) sub.push("起點 · 出發");
+  if (isDayOrigin(stop, index)) sub.push("起點 · 出發");
   else {
+    if (index === 0) sub.push("起點");
     if (stop.arrival_mode === "fixed" && stop.fixed_time) sub.push(`固定 ${stop.fixed_time}`);
     if (waitMinutes > 0) sub.push(`等待 ${formatDuration(waitMinutes)}`);
     sub.push(stop.stay_minutes > 0 ? `停留 ${formatDuration(stop.stay_minutes)}` : "不停留");
