@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { STOP_KINDS, type Stop, type StopKind } from "../../shared/schema";
 import { describeDate, formatDuration, formatHhmm } from "../../shared/time";
 import { BookingSection, type BookingDraft } from "../components/BookingSection";
+import { PinIcon } from "../components/icons";
+import { PlaceSearch, type PickedPlace } from "../components/PlaceSearch";
 import { deleteStop, saveStop, type Placement, type StopInput } from "../data/actions";
 import { safeUrl, saveBooking, type ReservationInput } from "../data/bookings";
 import { KIND_DEFAULT_STAY, KIND_LABEL, STAY_OPTIONS } from "../data/labels";
@@ -44,6 +46,11 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
   const [stay, setStay] = useState(stop?.stay_minutes ?? KIND_DEFAULT_STAY.sight);
   const [stayTouched, setStayTouched] = useState(Boolean(stop));
   const [note, setNote] = useState(stop?.note ?? "");
+  const [place, setPlace] = useState<(PickedPlace & { fetchedAt: number | null }) | null>(
+    stop && (stop.place_id || stop.lat !== null)
+      ? { placeId: stop.place_id, name: stop.name, address: stop.address, lat: stop.lat, lng: stop.lng, fetchedAt: stop.place_fetched_at }
+      : null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -52,6 +59,8 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
   const day = bundle.days.find((d) => d.id === dayId);
   const autoArrival = stop && day && sameDay ? dayTimeline(bundle, day).entries.find((e) => e.stop.id === stop.id)?.arrival : null;
   const back = `/trips/${trip.id}${dayId ? `?day=${dayId}` : ""}`;
+  const located = [...dayStops, ...bundle.stops].find((s) => s.lat !== null && s.lng !== null);
+  const bias = located?.lat != null && located.lng != null ? { lat: located.lat, lng: located.lng } : null;
 
   async function onSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,11 +95,11 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
       fixed_time: arrivalMode === "fixed" ? fixedTime : null,
       stay_minutes: stay,
       note: note.trim() || null,
-      place_id: stop?.place_id ?? null,
-      address: stop?.address ?? null,
-      lat: stop?.lat ?? null,
-      lng: stop?.lng ?? null,
-      place_fetched_at: stop?.place_fetched_at ?? null,
+      place_id: place?.placeId ?? null,
+      address: place?.address ?? null,
+      lat: place?.lat ?? null,
+      lng: place?.lng ?? null,
+      place_fetched_at: place ? place.fetchedAt : null,
     };
     let where: Placement | "keep";
     if (placement === KEEP && sameDay) where = "keep";
@@ -116,6 +125,34 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
         </button>
       </header>
       <form id="stop-form" className="form" onSubmit={(e) => void onSubmit(e)} noValidate>
+        <PlaceSearch
+          bias={bias}
+          onPick={(picked) => {
+            setPlace({ ...picked, fetchedAt: picked.lat !== null ? Date.now() : null });
+            if (picked.name) setName(picked.name);
+            setError(null);
+          }}
+        />
+
+        {place && (
+          <div className="card glass place-card">
+            <PinIcon size={20} />
+            <span className="place-card-text">
+              <strong>{place.address ?? (place.lat !== null && place.lng !== null ? `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}` : "已連結 Google 地點")}</strong>
+              <small>{place.lat !== null ? "已取得座標，可計算交通時間與顯示在地圖上" : "沒有座標"}</small>
+            </span>
+            <button
+              type="button"
+              className="topbar-text-btn"
+              onClick={() => {
+                setPlace(null);
+              }}
+            >
+              移除
+            </button>
+          </div>
+        )}
+
         <div className="field">
           <label htmlFor="stop-name" className="field-label">
             地點名稱

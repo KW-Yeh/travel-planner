@@ -22,6 +22,11 @@
       "bucket_name": "travel-planner-attachments"
     }
   ],
+  "vars": {
+    // Hours to cache Google route results in D1. 0 = off: Google's policies list place IDs
+    // and coordinates (30 days) as cacheable, but not route results.
+    "ROUTE_CACHE_TTL_HOURS": "0"
+  },
   "observability": {
     "enabled": true
   }

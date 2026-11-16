@@ -9,6 +9,9 @@ import { KIND_LABEL, MODE_SHORT } from "../data/labels";
 import { stopsOfDay } from "../data/queries";
 import { dayTimeline, tripDateText } from "../data/summary";
 import { useTripContext } from "./TripLayout";
+import { primaryLine, type RouteStep } from "../../shared/routes";
+import { useMapsConfig } from "../maps/google";
+import { knownAlternatives, switchLegMode, useAutoRefreshLegs } from "../maps/routes";
 import styles from "./Timeline.module.css";
 
 function TimeText({ minutes, danger }: { minutes: number | null; danger?: boolean }) {
@@ -33,8 +36,7 @@ function legDetail(leg: Leg): string {
   if (leg.source === "manual") return "手動";
   if (!leg.steps) return "";
   try {
-    const steps = JSON.parse(leg.steps) as { line?: string }[];
-    return steps.find((s) => s.line)?.line ?? "";
+    return primaryLine(JSON.parse(leg.steps) as RouteStep[]);
   } catch {
     return "";
   }
@@ -159,7 +161,9 @@ export function Timeline() {
 
   const stops = day ? stopsOfDay(bundle, day.id) : [];
   const unscheduled = stopsOfDay(bundle, null);
-  const timeline = day ? dayTimeline(bundle, day) : null;
+  const config = useMapsConfig();
+  useAutoRefreshLegs(bundle, day, config?.routesEnabled ?? false);
+  const timeline = day ? dayTimeline(bundle, day, knownAlternatives()) : null;
   const reservationsOf = (stopId: string) => bundle.reservations.filter((r) => r.stop_id === stopId);
   const daySearch = day ? `?day=${day.id}` : "";
 
@@ -167,6 +171,9 @@ export function Timeline() {
     if (s.kind === "shorten_stay") {
       const stop = stops.find((x) => x.id === s.stopId);
       if (stop) await setStay(stop, s.stayMinutes);
+    } else {
+      const leg = bundle.legs.find((l) => l.id === s.legId);
+      if (leg && !(await switchLegMode(leg, s.mode))) void navigate(`/trips/${trip.id}/legs/${leg.id}`);
     }
   }
 

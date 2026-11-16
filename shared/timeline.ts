@@ -136,6 +136,8 @@ export function computeTimeline({ departTime, stops, legs, reservations, alterna
 export type LegRefresh = { fromStopId: string; toStopId: string; leg: Leg | null; departAt: number | null; reason: "missing" | "unknown" | "departure_moved" };
 
 export const TRANSIT_REQUERY_MS = 30 * 60_000;
+/** A Google leg that came back without a time (no route, too far ahead) is retried at most daily. */
+export const UNKNOWN_RETRY_MS = 24 * 3_600_000;
 
 /**
  * Legs that need a (re)query after the day changed: consecutive pairs without a leg, Google
@@ -143,7 +145,7 @@ export const TRANSIT_REQUERY_MS = 30 * 60_000;
  * from the time they were queried for. Manual legs are never re-queried, and driving, walking
  * and cycling (no live traffic) do not depend on the departure time.
  */
-export function legsToRefresh(timeline: Timeline, date: string | null, timeZone: string): LegRefresh[] {
+export function legsToRefresh(timeline: Timeline, date: string | null, timeZone: string, now: number): LegRefresh[] {
   const out: LegRefresh[] = [];
   timeline.entries.forEach((entry, i) => {
     if (i === 0) return;
@@ -158,7 +160,7 @@ export function legsToRefresh(timeline: Timeline, date: string | null, timeZone:
     }
     if (leg.source === "manual") return;
     if (leg.minutes === null) {
-      out.push({ ...base, leg, reason: "unknown" });
+      if (leg.fetched_at === null || now - leg.fetched_at > UNKNOWN_RETRY_MS) out.push({ ...base, leg, reason: "unknown" });
       return;
     }
     if (

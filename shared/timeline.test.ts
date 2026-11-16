@@ -239,6 +239,16 @@ describe("computeTimeline", () => {
 describe("legsToRefresh", () => {
   const TZ = "Asia/Tokyo";
   const DATE = "2027-03-26";
+  const NOW = Date.UTC(2027, 2, 1);
+
+  it("retries a Google leg without a time at most once a day", () => {
+    const a = stop("a", 0);
+    const b = stop("b", 0);
+    const tried = (at: number) =>
+      computeTimeline({ departTime: "09:00", stops: [a, b], legs: [leg(a, b, null, { fetched_at: at })], reservations: [] });
+    expect(legsToRefresh(tried(NOW - 3_600_000), DATE, TZ, NOW)).toEqual([]);
+    expect(legsToRefresh(tried(NOW - 25 * 3_600_000), DATE, TZ, NOW).map((r) => r.reason)).toEqual(["unknown"]);
+  });
 
   it("requests legs for new pairs and Google legs without a time, never manual ones", () => {
     const a = stop("a", 0);
@@ -251,7 +261,7 @@ describe("legsToRefresh", () => {
       legs: [leg(b, c, null), leg(c, d, null, { source: "manual" })],
       reservations: [],
     });
-    expect(legsToRefresh(t, DATE, TZ).map((r) => [r.fromStopId, r.toStopId, r.reason])).toEqual([
+    expect(legsToRefresh(t, DATE, TZ, NOW).map((r) => [r.fromStopId, r.toStopId, r.reason])).toEqual([
       [a.id, b.id, "missing"],
       [b.id, c.id, "unknown"],
     ]);
@@ -268,14 +278,14 @@ describe("legsToRefresh", () => {
       { ...third, mode: "drive" as const, query_depart_at: queriedAt(8 * 60) },
     ];
     const t = computeTimeline({ ...input, legs: stamped });
-    expect(legsToRefresh(t, DATE, TZ).map((r) => [r.leg?.id, r.reason])).toEqual([[second.id, "departure_moved"]]);
+    expect(legsToRefresh(t, DATE, TZ, NOW).map((r) => [r.leg?.id, r.reason])).toEqual([[second.id, "departure_moved"]]);
   });
 
   it("gives the planned departure as an instant in the trip's time zone", () => {
     const a = stop("a", 0);
     const b = stop("b", 0);
     const t = computeTimeline({ departTime: "09:12", stops: [a, b], legs: [], reservations: [] });
-    expect(legsToRefresh(t, DATE, TZ)[0]?.departAt).toBe(Date.UTC(2027, 2, 26, 0, 12));
-    expect(legsToRefresh(t, null, TZ)[0]?.departAt).toBeNull();
+    expect(legsToRefresh(t, DATE, TZ, NOW)[0]?.departAt).toBe(Date.UTC(2027, 2, 26, 0, 12));
+    expect(legsToRefresh(t, null, TZ, NOW)[0]?.departAt).toBeNull();
   });
 });
