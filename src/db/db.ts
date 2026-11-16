@@ -1,3 +1,4 @@
+import { ATTACHMENT_CACHE } from "../../shared/cache";
 import Dexie, { type EntityTable, type Table } from "dexie";
 import type { AnyRow, Attachment, Day, Leg, Reservation, Stop, SyncTable, Trip } from "../../shared/schema";
 
@@ -54,4 +55,6 @@ export async function clearLocalData(database: TravelDB = db): Promise<void> {
   await database.transaction("rw", database.tables, async () => {
     await Promise.all(database.tables.map((t) => t.clear()));
   });
+  // Downloaded tickets belong to the signed-in account as much as the trips do.
+  if (typeof caches !== "undefined") await caches.delete(ATTACHMENT_CACHE);
 }

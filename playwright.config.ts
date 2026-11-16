@@ -23,6 +23,9 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
+    // page.route cannot see requests a service worker makes, so most specs run without one;
+    // pwa.spec.ts opts back in.
+    serviceWorkers: "block",
   },
   projects: [
     {

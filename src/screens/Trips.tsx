@@ -4,6 +4,7 @@ import type { MeResponse } from "../../shared/api";
 import { NetworkError } from "../api/client";
 import { useAuth } from "../auth/AuthProvider";
 import { PlusIcon, SettingsIcon, WarningIcon } from "../components/icons";
+import { InstallPrompt } from "../components/InstallPrompt";
 import { SyncStatus, usePendingCount } from "../components/SyncStatus";
 import { useAllTripBundles } from "../data/queries";
 import { localToday, summarizeTrip, type TripGroup, type TripSummary } from "../data/summary";
@@ -141,6 +142,8 @@ export function Trips({ user }: { user: MeResponse }) {
           </Link>
         </div>
       </header>
+
+      <InstallPrompt />
 
       <main className={styles.main}>
         {bundles && bundles.length === 0 && <p className="empty">還沒有旅程。按「建立旅程」開始規劃。</p>}

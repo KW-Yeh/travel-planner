@@ -1,0 +1,70 @@
+.card {
+  margin: 0 16px 12px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  border-radius: var(--radius-lg, 20px);
+  background: #15202b;
+  color: #fff;
+  box-shadow: 0 14px 32px rgb(21 32 43 / 0.28);
+  animation: rise 550ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.icon {
+  border-radius: 10px;
+}
+
+.text h2 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.text p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.82);
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.actions button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.later {
+  border: 1px solid rgb(255 255 255 / 0.35);
+  background: transparent;
+  color: #fff;
+}
+.install {
+  border: 0;
+  background: #fff;
+  color: #15202b;
+}
+.actions button:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+}
