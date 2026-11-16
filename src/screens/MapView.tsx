@@ -7,6 +7,7 @@ import { BackIcon, ModeIcon, NavigateIcon } from "../components/icons";
 import { MODE_LABEL } from "../data/labels";
 import type { TripBundle } from "../data/queries";
 import { dayTimeline } from "../data/summary";
+import { arcPath } from "../maps/arc";
 import { mapsLibrary, useMapsConfig, useOnline } from "../maps/google";
 import styles from "./MapView.module.css";
 import { useTripContext } from "./TripLayout";
@@ -79,18 +80,35 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
         const color = DAY_COLORS[row.dayIndex % DAY_COLORS.length] ?? "#1d4ed8";
         if (row.prev && hasCoords(row.prev) && hasCoords(row.stop)) {
           const walking = row.legIn?.mode === "walk";
-          const path = row.legIn?.polyline ? encoding.decodePath(row.legIn.polyline) : [row.prev, row.stop].map((s) => ({ lat: s.lat, lng: s.lng }));
-          const line = new Polyline({
-            map: map.current,
-            path,
-            strokeColor: color,
-            strokeOpacity: walking ? 0 : 0.85,
-            strokeWeight: 4,
-            icons: walking ? [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 0.9, strokeColor: color, scale: 3 }, offset: "0", repeat: "12px" }] : [],
-          });
+          const dashes = walking ? [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 0.9, strokeColor: color, scale: 3 }, offset: "0", repeat: "12px" }] : [];
+          const from = { lat: row.prev.lat, lng: row.prev.lng };
+          const to = { lat: row.stop.lat, lng: row.stop.lng };
+          const lines: google.maps.Polyline[] = [];
+          if (row.legIn?.polyline) {
+            lines.push(
+              new Polyline({ map: map.current, path: encoding.decodePath(row.legIn.polyline), strokeColor: color, strokeOpacity: walking ? 0 : 0.85, strokeWeight: 4, icons: dashes }),
+            );
+          } else {
+            // No real route (typed in by hand): a raised arc over a ground shadow, so it reads as a sketch, not a road.
+            const arc = arcPath(from, to);
+            lines.push(
+              new Polyline({ map: map.current, path: [from, to], strokeColor: "#15202b", strokeOpacity: 0.14, strokeWeight: 6, zIndex: 1, clickable: false }),
+              new Polyline({ map: map.current, path: arc, strokeColor: "#ffffff", strokeOpacity: 0.9, strokeWeight: 8, zIndex: 2, clickable: false }),
+              new Polyline({
+                map: map.current,
+                path: arc,
+                strokeColor: color,
+                strokeOpacity: walking ? 0 : 0.9,
+                strokeWeight: 4,
+                zIndex: 3,
+                clickable: false,
+                icons: [...dashes, { icon: { path: "M -2.4,2 0,-2 2.4,2 z", fillColor: color, fillOpacity: 1, strokeColor: "#ffffff", strokeWeight: 1.2, scale: 2.4 }, offset: "55%" }],
+              }),
+            );
+          }
           overlays.current.push({
             clear: () => {
-              line.setMap(null);
+              for (const line of lines) line.setMap(null);
             },
           });
         }
