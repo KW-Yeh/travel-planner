@@ -1,0 +1,16 @@
+# Copy to .dev.vars (git-ignored) and fill in locally. Never commit real values.
+# Production values are set with `npx wrangler secret put <NAME>`.
+
+# Fixed login account
+AUTH_USERNAME=
+# Output of `npm run auth:hash` (format: pbkdf2-sha256$<iterations>$<salt>$<hash>)
+AUTH_PASSWORD_HASH=
+# Random value for signing session cookies, e.g. `openssl rand -base64 32`
+SESSION_SECRET=
+
+# Server-side key, restricted to the Routes API
+GOOGLE_ROUTES_KEY=
+# Browser key, restricted to Maps JavaScript API + Places API and to your domain
+GOOGLE_MAPS_BROWSER_KEY=
+# Map ID for Advanced Markers (DEMO_MAP_ID works for local development)
+GOOGLE_MAP_ID=

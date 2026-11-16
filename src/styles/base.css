@@ -1,0 +1,28 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background:
+    radial-gradient(circle at 12% 8%, #cfe0ff 0, rgb(207 224 255 / 0) 42%),
+    radial-gradient(circle at 92% 30%, #ffe3c7 0, rgb(255 227 199 / 0) 38%),
+    radial-gradient(circle at 30% 96%, #d4f0e4 0, rgb(212 240 228 / 0) 40%),
+    var(--color-surface-base);
+  background-attachment: fixed;
+}
+
+.app-shell {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}

@@ -55,7 +55,7 @@ travel-planner/
 │  ├─ maps/                  # loader、autocomplete、deep link builder
 │  ├─ styles/                # tokens.css、glass.css、motion.css
 │  └─ sw.ts                  # service worker
-├─ scripts/hash-password.ts  # 由你自己在本機執行，產生密碼雜湊
+├─ scripts/auth-hash.ts  # 由你自己在本機執行，產生密碼雜湊
 ├─ .dev.vars.example         # 只有欄位名稱，實際值你自己填
 └─ test/                     # worker 整合測試、e2e
 ```
@@ -297,7 +297,7 @@ Session cookie：`__Host-tp_session=<token>.<hmac>`，`HttpOnly; Secure; SameSit
 | 名稱 | 種類 | 用途 |
 |---|---|---|
 | `AUTH_USERNAME` | secret | 固定帳號 |
-| `AUTH_PASSWORD_HASH` | secret | `pbkdf2-sha256$100000$<salt b64>$<hash b64>`，由 `npm run hash-password`（從 stdin 讀密碼、不回顯）在你的終端機產生 |
+| `AUTH_PASSWORD_HASH` | secret | `pbkdf2-sha256$100000$<salt b64>$<hash b64>`，由 `npm run auth:hash`（從 stdin 讀密碼、不回顯）在你的終端機產生 |
 | `SESSION_SECRET` | secret | cookie HMAC，`openssl rand -base64 32` 產生 |
 | `GOOGLE_ROUTES_KEY` | secret | Worker 呼叫 Routes API |
 | `GOOGLE_MAPS_BROWSER_KEY` | var | 瀏覽器端 Maps JS／Places |
@@ -312,7 +312,7 @@ Session cookie：`__Host-tp_session=<token>.<hmac>`，`HttpOnly; Secure; SameSit
 ### 階段 1：專案骨架
 - Vite + React + TS、Cloudflare Vite plugin、Hono Worker、`wrangler.jsonc`（assets、`DB` D1 binding、`ATTACHMENTS` R2 binding）
 - `migrations/0001_init.sql`（第 3 節全部資料表）
-- ESLint、`tsc`、Vitest（含 workers pool）、Playwright 設定；`.gitignore`、`.dev.vars.example`、`scripts/hash-password.ts`
+- ESLint、`tsc`、Vitest（含 workers pool）、Playwright 設定；`.gitignore`、`.dev.vars.example`、`scripts/auth-hash.ts`
 - **驗收**：`wrangler d1 migrations apply DB --local` 成功；`wrangler dev` 下 `/` 回傳 React 頁、`/api/health` 回 `200`；Worker 測試能在套用 migration 的 D1 上查到所有資料表
 
 ### 階段 2：登入
