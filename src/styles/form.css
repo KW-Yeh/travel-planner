@@ -116,8 +116,9 @@
   color: var(--color-ink);
 }
 .group .textarea {
+  display: block;
   border: 0;
-  border-radius: 0;
+  border-radius: calc(var(--radius-lg) - 1px);
   background: transparent;
   backdrop-filter: none;
   padding: 12px 14px;
