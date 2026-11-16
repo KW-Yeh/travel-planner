@@ -8,6 +8,7 @@ import { MODE_LABEL } from "../data/labels";
 import type { TripBundle } from "../data/queries";
 import { dayTimeline } from "../data/summary";
 import { arcPath } from "../maps/arc";
+import { focusPoints, type FocusPoint } from "../maps/focus";
 import { mapsLibrary, useMapsConfig, useOnline } from "../maps/google";
 import styles from "./MapView.module.css";
 import { useTripContext } from "./TripLayout";
@@ -74,6 +75,7 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
       for (const o of overlays.current) o.clear();
       overlays.current = [];
       const bounds = new LatLngBounds();
+      const placed: FocusPoint[] = [];
       const animate = !reducedMotion();
 
       for (const row of rows) {
@@ -121,8 +123,9 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
           onSelectRef.current(stopId);
         });
         overlays.current.push({ clear: () => (marker.map = null) });
-        bounds.extend({ lat: row.stop.lat, lng: row.stop.lng });
+        placed.push({ lat: row.stop.lat, lng: row.stop.lng, transport: row.stop.kind === "transport" });
       }
+      for (const p of focusPoints(placed)) bounds.extend(p);
       if (!bounds.isEmpty()) map.current.fitBounds(bounds, 48);
     })().catch(() => {
       if (!run.cancelled) setFailed(true);
