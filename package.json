@@ -18,7 +18,9 @@
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "cf-typegen": "wrangler types worker/worker-configuration.d.ts --env-file .dev.vars.example --strict-vars=false",
     "auth:hash": "node scripts/auth-hash.ts",
-    "postinstall": "npm run -s cf-typegen"
+    "postinstall": "npm run -s cf-typegen",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "2.1.3",
