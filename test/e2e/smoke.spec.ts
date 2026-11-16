@@ -10,6 +10,6 @@ test("serves the app shell and the API from one Worker", async ({ page, request 
   const health = await request.get("/api/health");
   expect(health.status()).toBe(200);
 
-  const missing = await request.get("/api/does-not-exist");
-  expect(missing.status()).toBe(404);
+  const protectedRoute = await request.get("/api/auth/me");
+  expect(protectedRoute.status()).toBe(401);
 });

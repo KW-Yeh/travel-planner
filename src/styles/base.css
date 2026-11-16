@@ -19,6 +19,57 @@ body {
     radial-gradient(circle at 30% 96%, #d4f0e4 0, rgb(212 240 228 / 0) 40%),
     var(--color-surface-base);
   background-attachment: fixed;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Glass surface (Spec §11): translucent white over the blurred backdrop. */
+input,
+select,
+textarea {
+  background: var(--glass-fallback);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  input,
+  select,
+  textarea {
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+}
+
+button,
+a {
+  transition:
+    transform 0.15s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+button:active:not(:disabled),
+a:active {
+  transform: scale(0.96);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 .app-shell {

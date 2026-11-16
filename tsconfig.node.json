@@ -13,7 +13,7 @@
     "playwright.config.ts",
     "scripts",
     "test/e2e",
-    "shared",
-    "src/**/*.test.ts"
+    "test/fixtures",
+    "shared"
   ]
 }

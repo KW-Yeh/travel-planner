@@ -1,5 +1,6 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
+import { api, loggedInCookie } from "./helpers";
 
 describe("worker skeleton", () => {
   it("answers the health check", async () => {
@@ -8,8 +9,13 @@ describe("worker skeleton", () => {
     expect(await res.json()).toEqual({ ok: true });
   });
 
-  it("returns JSON 404 for unknown API routes", async () => {
+  it("requires a session before revealing whether an API route exists", async () => {
     const res = await exports.default.fetch("http://example.com/api/nope");
+    expect(res.status).toBe(401);
+  });
+
+  it("returns JSON 404 for unknown API routes when signed in", async () => {
+    const res = await api("/api/nope", { cookie: await loggedInCookie() });
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: "not_found" });
   });

@@ -1,8 +1,25 @@
+import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import { Login } from "./screens/Login";
+import { SignedIn } from "./screens/SignedIn";
+
+function Root() {
+  const { state } = useAuth();
+  switch (state.status) {
+    case "checking":
+      return null;
+    case "offline":
+      return <Login offline />;
+    case "signedOut":
+      return <Login />;
+    case "signedIn":
+      return <SignedIn user={state.user} />;
+  }
+}
+
 export function App() {
   return (
-    <main className="app-shell">
-      <h1>旅程規劃</h1>
-      <p>專案骨架已就緒。</p>
-    </main>
+    <AuthProvider>
+      <Root />
+    </AuthProvider>
   );
 }
