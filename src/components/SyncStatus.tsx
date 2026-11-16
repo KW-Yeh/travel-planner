@@ -20,14 +20,15 @@ export function describeSync(phase: SyncPhase, pending: number): { text: string;
   }
 }
 
-export function usePendingCount(): number {
-  return useLiveQuery(() => db.outbox.count(), [], 0);
+/** Number of local changes not yet uploaded; undefined until IndexedDB has answered. */
+export function usePendingCount(): number | undefined {
+  return useLiveQuery(() => db.outbox.count(), []);
 }
 
 export function SyncStatus() {
   const { phase } = useSyncExternalStore(syncEngine.subscribe, syncEngine.getStatus);
   const pending = usePendingCount();
-  const { text, tone } = describeSync(phase, pending);
+  const { text, tone } = describeSync(pending === undefined ? "syncing" : phase, pending ?? 0);
   return (
     <footer className={styles.bar} role="status" aria-live="polite">
       <span className={`${styles.dot} ${styles[tone]}`} aria-hidden="true" />

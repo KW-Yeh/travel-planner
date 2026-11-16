@@ -1,0 +1,108 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(20px, env(safe-area-inset-top)) 16px 12px;
+}
+.header h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.main {
+  flex: 1;
+  padding: 4px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: rise 0.5s var(--ease-out) both;
+}
+.group:nth-of-type(2) {
+  animation-delay: 0.08s;
+}
+.group:nth-of-type(3) {
+  animation-delay: 0.16s;
+}
+
+.trip {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tripHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tripTitles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.tripTitles h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+.tripTitles p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+}
+.stats > div {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgb(21 32 43 / 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stats strong {
+  font-size: 18px;
+}
+.stats span {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+}
+
+.conflict {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-danger-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sheet h2 {
+  margin: 0;
+  font-size: 18px;
+}

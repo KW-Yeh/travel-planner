@@ -105,6 +105,9 @@ export type Stop = z.infer<typeof StopRow>;
 export type Leg = z.infer<typeof LegRow>;
 export type Reservation = z.infer<typeof ReservationRow>;
 export type Attachment = z.infer<typeof AttachmentRow>;
+export type StopKind = (typeof STOP_KINDS)[number];
+export type LegMode = (typeof LEG_MODES)[number];
+export type ReservationStatus = (typeof RESERVATION_STATUSES)[number];
 export type RowOf<T extends SyncTable> = z.infer<(typeof SYNC_SCHEMAS)[T]>;
 export type AnyRow = RowOf<SyncTable>;
 

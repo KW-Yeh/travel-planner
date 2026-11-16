@@ -31,7 +31,8 @@ const INTERVAL_MS = 60_000;
 const key = (table: SyncTable, id: string): [SyncTable, string] => [table, id];
 
 export class SyncEngine {
-  private status: SyncStatus = { phase: "idle", lastSyncAt: null };
+  // Nothing is known to be in sync until the first cycle finishes.
+  private status: SyncStatus = { phase: "syncing", lastSyncAt: null };
   private readonly subscribers = new Set<() => void>();
   private running: Promise<void> | null = null;
   private rerun = false;
