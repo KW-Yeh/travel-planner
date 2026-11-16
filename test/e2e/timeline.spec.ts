@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { addStop, createTrip, setLegMinutes, shownTimes, signIn } from "./helpers";
+import { addStop, createTrip, pickStay, setLegMinutes, shownTimes, signIn } from "./helpers";
 
 test("builds a day, pushes times on change and flags a fixed time it cannot reach", async ({ page }) => {
   await signIn(page);
@@ -18,13 +18,13 @@ test("builds a day, pushes times on change and flags a fixed time it cannot reac
   await expect(page.getByText("3 個地點 · 交通共 40 分")).toBeVisible();
 
   await page.getByRole("link", { name: /伏見稻荷大社/ }).click();
-  await page.getByLabel("停留時間").selectOption({ label: "1 小時" });
+  await pickStay(page, "1 小時");
   await page.getByRole("button", { name: "儲存" }).click();
   await expect.poll(() => shownTimes(page)).toEqual(["09:12", "09:20", "10:52"]);
 
   await page.getByRole("link", { name: /清水寺/ }).click();
-  await page.getByLabel("抵達時間").selectOption("fixed");
-  await page.getByLabel(/固定抵達時間/).fill("10:30");
+  await page.getByRole("switch", { name: "固定抵達時間" }).click();
+  await page.getByLabel("抵達時刻").fill("10:30");
   await page.getByRole("button", { name: "儲存" }).click();
   await expect(page.getByText("排不進固定時間，預計晚 22 分抵達")).toBeVisible();
   await expect.poll(() => shownTimes(page)).toEqual(["09:12", "09:20", "10:30"]);

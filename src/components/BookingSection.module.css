@@ -1,26 +1,14 @@
-.section {
-  padding: 12px 14px;
-  border-radius: 14px;
+.block {
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
-.toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: var(--tap-min);
-}
-.toggle label {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 700;
-}
-.toggle input {
-  width: 24px;
-  height: 24px;
-  accent-color: var(--color-primary);
+.count {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-ink-muted);
 }
 
 .files {
@@ -34,38 +22,79 @@
 .files li {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-.fileName {
-  flex: 1;
-  min-width: 0;
-  min-height: var(--tap-min);
-  padding: 0 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: rgb(21 32 43 / 0.05);
-  color: var(--color-ink);
-  font: inherit;
-  font-size: 13px;
-  text-align: left;
-  overflow-wrap: anywhere;
-  cursor: pointer;
+  gap: 10px;
+  padding: 4px 0 4px 8px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: rgb(255 255 255 / 0.7);
 }
 
-.attach {
-  min-height: var(--tap-min);
+.badge {
+  width: 36px;
+  height: 36px;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed #8793a0;
-  border-radius: var(--radius-sm);
-  background: rgb(21 32 43 / 0.05);
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: 8px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+.pdf {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.fileName {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  text-align: left;
+}
+button.fileName {
   cursor: pointer;
+}
+.fileName strong {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.fileName small {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+
+.attach {
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1.5px dashed #8793a0;
+  border-radius: var(--radius-md);
+  background: rgb(21 32 43 / 0.03);
+  cursor: pointer;
+}
+.attach strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--color-primary);
+}
+.attach small {
+  font-size: 11px;
+  color: var(--color-ink-muted);
 }
 .attach:focus-within {
   outline: 3px solid var(--color-primary);

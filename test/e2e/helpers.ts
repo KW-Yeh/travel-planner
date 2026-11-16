@@ -45,17 +45,30 @@ export async function createTrip(page: Page, name: string, start: string, end: s
   await page.goto("/");
   await page.getByRole("link", { name: "建立旅程" }).click();
   await page.getByLabel("旅程名稱").fill(name);
-  await page.getByLabel("開始日期").fill(start);
-  await page.getByLabel("結束日期").fill(end);
+  await pickDate(page, start);
+  if (end !== start) await pickDate(page, end);
   await page.getByRole("button", { name: "儲存" }).click();
   await expect(page.getByRole("heading", { name, level: 1 })).toBeVisible();
+}
+
+/** Clicks a day in the trip form's range calendar; the first click makes a one-day range, the next one extends it. */
+export async function pickDate(page: Page, iso: string): Promise<void> {
+  const [y, m, d] = iso.split("-").map(Number);
+  await page.getByLabel("選擇年份").selectOption(String(y));
+  await page.getByLabel("選擇月份").selectOption(String((m ?? 1) - 1));
+  await page.getByRole("button", { name: new RegExp(`^(今天，)?${y}年${m}月${d}日`) }).click();
+}
+
+export async function pickStay(page: Page, label: string): Promise<void> {
+  await page.getByRole("button", { name: /^停留時間/ }).click();
+  await page.getByRole("radio", { name: label, exact: true }).click();
 }
 
 export async function addStop(page: Page, name: string, opts: { kind?: string; stay?: string } = {}): Promise<void> {
   await page.getByRole("link", { name: "新增地點" }).click();
   await page.getByLabel("地點名稱").fill(name);
-  if (opts.kind) await page.getByRole("button", { name: opts.kind, exact: true }).click();
-  if (opts.stay) await page.getByLabel("停留時間").selectOption({ label: opts.stay });
+  if (opts.kind) await page.getByRole("radio", { name: opts.kind, exact: true }).click();
+  if (opts.stay) await pickStay(page, opts.stay);
   await page.getByRole("button", { name: "儲存" }).click();
   await expect(page.getByRole("link", { name: new RegExp(name) })).toBeVisible();
 }

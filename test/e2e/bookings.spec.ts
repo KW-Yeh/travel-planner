@@ -39,7 +39,7 @@ test("a late booking shows a conflict, a one-tap fix, and appears on the booking
   await setLegMinutes(page, 1, 25);
 
   await openStop(page, "錦市場 午餐");
-  await page.getByLabel("有訂位或票券").check();
+  await page.getByRole("switch", { name: "有訂位或票券" }).click();
   await page.getByLabel("訂位時間").fill("12:00");
   await page.getByLabel("訂位代號").fill("KY-2048");
   await page.getByLabel("確認連結").fill("javascript:alert(1)");
@@ -69,7 +69,7 @@ test("files attached offline upload later and reach another device", async ({ br
 
   await cutApi(a);
   await openStop(a, "旅館");
-  await a.getByLabel("有訂位或票券").check();
+  await a.getByRole("switch", { name: "有訂位或票券" }).click();
   await a.locator('input[type="file"]').setInputFiles([
     { name: "確認信.pdf", mimeType: "application/pdf", buffer: PDF },
     { name: "qr.png", mimeType: "image/png", buffer: PNG },

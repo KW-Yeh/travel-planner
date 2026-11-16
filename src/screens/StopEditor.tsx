@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { STOP_KINDS, type Stop, type StopKind } from "../../shared/schema";
 import { describeDate, formatDuration, formatHhmm } from "../../shared/time";
 import { BookingSection, type BookingDraft } from "../components/BookingSection";
-import { PinIcon } from "../components/icons";
+import { FieldError, PickerRow, Segmented, Sheet, Switch } from "../components/form";
+import { CloseIcon, KindIcon, PinIcon } from "../components/icons";
 import { PlaceSearch, type PickedPlace } from "../components/PlaceSearch";
 import { deleteStop, saveStop, type Placement, type StopInput } from "../data/actions";
 import { safeUrl, saveBooking, type ReservationInput } from "../data/bookings";
@@ -12,7 +13,10 @@ import { stopsOfDay, useTripBundle, type TripBundle } from "../data/queries";
 import { dayTimeline } from "../data/summary";
 import { selectDay } from "./TripLayout";
 
+type StopErrors = { name?: string | undefined; url?: string | undefined };
+
 const KEEP = "keep";
+const UNSCHEDULED = "unscheduled";
 const START = "start";
 const END = "end";
 
@@ -30,7 +34,7 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
   const [booking, setBooking] = useState<BookingDraft>({
     enabled: reservation !== null || startWithBooking,
     time: reservation?.time ?? "",
-    party: String(reservation?.party_size ?? trip.party_size),
+    party: reservation ? reservation.party_size : trip.party_size,
     code: reservation?.code ?? "",
     url: reservation?.url ?? "",
     status: reservation?.status ?? "confirmed",
@@ -51,7 +55,7 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
       ? { placeId: stop.place_id, name: stop.name, address: stop.address, lat: stop.lat, lng: stop.lng, fetchedAt: stop.place_fetched_at }
       : null,
   );
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<StopErrors>({});
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const dayStops = stopsOfDay(bundle, dayId).filter((s) => s.id !== stop?.id);
@@ -64,30 +68,22 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
 
   async function onSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!name.trim()) {
-      setError("請輸入地點名稱。");
-      return;
-    }
+    const found: StopErrors = {};
+    if (!name.trim()) found.name = "請輸入地點名稱。";
     let reservationInput: ReservationInput | null = null;
     if (booking.enabled) {
       const url = booking.url.trim() ? safeUrl(booking.url) : null;
-      if (booking.url.trim() && !url) {
-        setError("確認連結需要是 http 或 https 開頭的網址。");
-        return;
-      }
-      const party = booking.party ? Number(booking.party) : null;
-      if (party !== null && (!Number.isInteger(party) || party < 1 || party > 999)) {
-        setError("人數需介於 1 到 999。");
-        return;
-      }
+      if (booking.url.trim() && !url) found.url = "確認連結需要是 http 或 https 開頭的網址。";
       reservationInput = {
         time: booking.time || null,
-        party_size: party,
+        party_size: booking.party,
         code: booking.code.trim() || null,
         url,
         status: booking.status,
       };
     }
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
     const input: StopInput = {
       name: name.trim(),
       kind,
@@ -113,6 +109,20 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
     void navigate(back, { replace: true });
   }
 
+  const dayOptions = [
+    ...bundle.days.map((d, i) => {
+      const date = describeDate(d.date);
+      return { value: d.id, label: `Day ${i + 1} · ${date.md} ${date.weekday}` };
+    }),
+    { value: UNSCHEDULED, label: "尚未排入" },
+  ];
+  const placementOptions = [
+    ...(stop && sameDay ? [{ value: KEEP, label: "目前位置" }] : []),
+    { value: START, label: "最前面" },
+    ...dayStops.map((s) => ({ value: s.id, label: `${s.name}之後` })),
+    { value: END, label: "最後" },
+  ];
+
   return (
     <div className="screen">
       <header className="topbar glass">
@@ -120,214 +130,181 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
           取消
         </Link>
         <h1 className="topbar-center">{stop ? "編輯地點" : "新增地點"}</h1>
-        <button type="submit" form="stop-form" className="topbar-text-btn strong">
+        <button type="submit" form="stop-form" className="btn btn-primary btn-pill topbar-save">
           儲存
         </button>
       </header>
       <form id="stop-form" className="form" onSubmit={(e) => void onSubmit(e)} noValidate>
-        <PlaceSearch
-          bias={bias}
-          onPick={(picked) => {
-            setPlace({ ...picked, fetchedAt: picked.lat !== null ? Date.now() : null });
-            if (picked.name) setName(picked.name);
-            setError(null);
-          }}
-        />
-
-        {place && (
-          <div className="card glass place-card">
-            <PinIcon size={20} />
-            <span className="place-card-text">
-              <strong>{place.address ?? (place.lat !== null && place.lng !== null ? `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}` : "已連結 Google 地點")}</strong>
-              <small>{place.lat !== null ? "已取得座標，可計算交通時間與顯示在地圖上" : "沒有座標"}</small>
-            </span>
-            <button
-              type="button"
-              className="topbar-text-btn"
-              onClick={() => {
-                setPlace(null);
-              }}
-            >
-              移除
-            </button>
-          </div>
-        )}
-
         <div className="field">
-          <label htmlFor="stop-name" className="field-label">
-            地點名稱
-          </label>
-          <input
-            id="stop-name"
-            className="input glass"
-            value={name}
-            maxLength={200}
-            placeholder="例如 清水寺"
-            onChange={(e) => {
-              setName(e.target.value);
+          <PlaceSearch
+            bias={bias}
+            onPick={(picked) => {
+              setPlace({ ...picked, fetchedAt: picked.lat !== null ? Date.now() : null });
+              if (picked.name) setName(picked.name);
+              setErrors({});
             }}
           />
-        </div>
-
-        <fieldset className="field">
-          <legend>類型</legend>
-          <div className="chips">
-            {STOP_KINDS.map((k) => (
+          {place && (
+            <div className="card glass place-card">
+              <span className="icon-tile">
+                <PinIcon size={18} />
+              </span>
+              <span className="place-card-text">
+                <strong>{place.address ?? (place.lat !== null && place.lng !== null ? `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}` : "已連結 Google 地點")}</strong>
+                <small>{place.lat !== null ? "已取得座標，可計算交通時間與顯示在地圖上" : "沒有座標"}</small>
+              </span>
               <button
-                key={k}
                 type="button"
-                className="chip"
-                aria-pressed={kind === k}
+                className="icon-btn"
+                aria-label="移除已連結的地點"
                 onClick={() => {
-                  setKind(k);
-                  if (!stayTouched) setStay(KIND_DEFAULT_STAY[k]);
+                  setPlace(null);
                 }}
               >
-                {KIND_LABEL[k]}
+                <CloseIcon size={18} />
               </button>
-            ))}
-          </div>
-        </fieldset>
-
-        <div className="field-row">
-          <div className="field">
-            <label htmlFor="stop-day" className="field-label">
-              日期
-            </label>
-            <select
-              id="stop-day"
-              className="select glass"
-              value={dayId ?? ""}
-              onChange={(e) => {
-                setDayId(e.target.value || null);
-                setPlacement(END);
-              }}
-            >
-              {bundle.days.map((d, i) => {
-                const date = describeDate(d.date);
-                return (
-                  <option key={d.id} value={d.id}>
-                    Day {i + 1} · {date.md} {date.weekday}
-                  </option>
-                );
-              })}
-              <option value="">尚未排入</option>
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="stop-after" className="field-label">
-              排在
-            </label>
-            <select
-              id="stop-after"
-              className="select glass"
-              value={placement}
-              onChange={(e) => {
-                setPlacement(e.target.value);
-              }}
-            >
-              {stop && sameDay && <option value={KEEP}>目前位置</option>}
-              <option value={START}>最前面</option>
-              {dayStops.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}之後
-                </option>
-              ))}
-              <option value={END}>最後</option>
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="stop-arrival" className="field-label">
-              抵達時間
-            </label>
-            <select
-              id="stop-arrival"
-              className="select glass"
-              value={arrivalMode}
-              onChange={(e) => {
-                setArrivalMode(e.target.value === "fixed" ? "fixed" : "auto");
-              }}
-            >
-              <option value="auto">自動推算{autoArrival != null ? `（${formatHhmm(autoArrival)}）` : ""}</option>
-              <option value="fixed">指定固定時間</option>
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="stop-stay" className="field-label">
-              停留時間
-            </label>
-            <select
-              id="stop-stay"
-              className="select glass"
-              value={stay}
-              onChange={(e) => {
-                setStay(Number(e.target.value));
-                setStayTouched(true);
-              }}
-            >
-              {stayOptions(stay).map((m) => (
-                <option key={m} value={m}>
-                  {m === 0 ? "不停留" : formatDuration(m)}
-                </option>
-              ))}
-            </select>
-          </div>
+            </div>
+          )}
         </div>
 
-        {arrivalMode === "fixed" && (
-          <div className="field">
-            <label htmlFor="stop-fixed" className="field-label">
-              固定抵達時間（例如開場時間，後面的行程不會推擠它）
-            </label>
-            <input
-              id="stop-fixed"
-              type="time"
-              className="input glass"
-              value={fixedTime}
-              onChange={(e) => {
-                if (e.target.value) setFixedTime(e.target.value);
+        <div>
+          <p className="group-caption">名稱與類型</p>
+          <div className="group glass">
+            <div className="row">
+              <label htmlFor="stop-name" className="row-label fixed">
+                地點名稱
+              </label>
+              <input
+                id="stop-name"
+                className="row-input"
+                value={name}
+                maxLength={200}
+                placeholder="例如 清水寺"
+                aria-invalid={errors.name ? true : undefined}
+                aria-describedby={errors.name ? "stop-name-err" : undefined}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setErrors((prev) => ({ ...prev, name: undefined }));
+                }}
+              />
+            </div>
+            <FieldError id="stop-name-err" message={errors.name} />
+            <Segmented
+              variant="tile"
+              label="類型"
+              value={kind}
+              options={STOP_KINDS.map((k) => ({ value: k, label: KIND_LABEL[k], icon: <KindIcon kind={k} size={20} /> }))}
+              onChange={(k) => {
+                setKind(k);
+                if (!stayTouched) setStay(KIND_DEFAULT_STAY[k]);
               }}
             />
           </div>
-        )}
-
-        <BookingSection draft={booking} existing={existingFiles} onChange={setBooking} />
-
-        <div className="field">
-          <label htmlFor="stop-note" className="field-label">
-            備註
-          </label>
-          <textarea
-            id="stop-note"
-            className="textarea glass"
-            rows={2}
-            maxLength={5000}
-            placeholder="營業時間、想吃的東西、注意事項…"
-            value={note}
-            onChange={(e) => {
-              setNote(e.target.value);
-            }}
-          />
         </div>
 
-        {error && (
-          <p className="error-text" role="alert">
-            {error}
-          </p>
-        )}
-
-        {stop &&
-          (confirmDelete ? (
-            <button
-              type="button"
-              className="btn btn-danger btn-block"
-              onClick={() => {
-                void deleteStop(stop).then(() => navigate(back, { replace: true }));
+        <div>
+          <p className="group-caption">安排</p>
+          <div className="group glass">
+            <PickerRow
+              label="日期"
+              value={dayId ?? UNSCHEDULED}
+              options={dayOptions}
+              onChange={(v) => {
+                setDayId(v === UNSCHEDULED ? null : v);
+                setPlacement(END);
               }}
-            >
-              確定刪除「{stop.name}」與它的訂位
-            </button>
-          ) : (
+            />
+            <PickerRow label="排在" value={placement} options={placementOptions} onChange={setPlacement} />
+            <PickerRow
+              label="停留時間"
+              layout="grid"
+              value={stay}
+              options={stayOptions(stay).map((m) => ({ value: m, label: m === 0 ? "不停留" : formatDuration(m) }))}
+              onChange={(m) => {
+                setStay(m);
+                setStayTouched(true);
+              }}
+              extra={(close) => (
+                <CustomMinutes
+                  onApply={(m) => {
+                    setStay(m);
+                    setStayTouched(true);
+                    close();
+                  }}
+                />
+              )}
+            />
+            <div className="row">
+              <span className="row-text">
+                <label htmlFor="stop-fixed-on" className="row-title">
+                  固定抵達時間
+                </label>
+                <small>
+                  {arrivalMode === "fixed"
+                    ? "例如開場時間，後面的行程不會推擠它"
+                    : `關閉時自動推算${autoArrival != null ? `：約 ${formatHhmm(autoArrival)}` : ""}`}
+                </small>
+              </span>
+              <Switch
+                id="stop-fixed-on"
+                label="固定抵達時間"
+                checked={arrivalMode === "fixed"}
+                onChange={(on) => {
+                  setArrivalMode(on ? "fixed" : "auto");
+                }}
+              />
+            </div>
+            {arrivalMode === "fixed" && (
+              <div className="row">
+                <label htmlFor="stop-fixed" className="row-label">
+                  抵達時刻
+                </label>
+                <input
+                  id="stop-fixed"
+                  type="time"
+                  className="pill-input"
+                  value={fixedTime}
+                  onChange={(e) => {
+                    if (e.target.value) setFixedTime(e.target.value);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <BookingSection
+          draft={booking}
+          existing={existingFiles}
+          errors={{ url: errors.url }}
+          subtitle={name.trim() || "訂位資訊"}
+          onChange={(next) => {
+            if (next.url !== booking.url) setErrors((prev) => ({ ...prev, url: undefined }));
+            setBooking(next);
+          }}
+        />
+
+        <div>
+          <p className="group-caption">
+            <label htmlFor="stop-note">備註</label>
+          </p>
+          <div className="group glass">
+            <textarea
+              id="stop-note"
+              className="textarea"
+              rows={3}
+              maxLength={5000}
+              placeholder="營業時間、想吃的東西、注意事項…"
+              value={note}
+              onChange={(e) => {
+                setNote(e.target.value);
+              }}
+            />
+          </div>
+        </div>
+
+        {stop && (
+          <>
             <button
               type="button"
               className="btn btn-danger btn-block"
@@ -337,8 +314,66 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
             >
               刪除地點
             </button>
-          ))}
+            <Sheet open={confirmDelete} onOpenChange={setConfirmDelete} title={`刪除「${stop.name}」？`}>
+              <p className="hint">{reservation ? "這個地點的訂位與附件也會一起刪除，" : ""}所有裝置上都會消失。</p>
+              <button
+                type="button"
+                className="btn btn-danger btn-block"
+                onClick={() => {
+                  void deleteStop(stop).then(() => navigate(back, { replace: true }));
+                }}
+              >
+                刪除地點
+              </button>
+              <button
+                type="button"
+                className="btn btn-quiet btn-block"
+                onClick={() => {
+                  setConfirmDelete(false);
+                }}
+              >
+                取消
+              </button>
+            </Sheet>
+          </>
+        )}
       </form>
+    </div>
+  );
+}
+
+function CustomMinutes({ onApply }: { onApply: (minutes: number) => void }) {
+  const [value, setValue] = useState("");
+  const minutes = Number(value);
+  const valid = value !== "" && Number.isInteger(minutes) && minutes >= 0 && minutes <= 1440;
+  return (
+    <div className="group">
+      <div className="row">
+        <label htmlFor="stay-custom" className="row-label">
+          自訂（分鐘）
+        </label>
+        <input
+          id="stay-custom"
+          className="pill-input"
+          inputMode="numeric"
+          placeholder="例如 200"
+          style={{ width: 96, textAlign: "right" }}
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value.replace(/\D/g, ""));
+          }}
+        />
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!valid}
+          onClick={() => {
+            onApply(minutes);
+          }}
+        >
+          套用
+        </button>
+      </div>
     </div>
   );
 }
