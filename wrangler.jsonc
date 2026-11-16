@@ -11,8 +11,7 @@
     {
       "binding": "DB",
       "database_name": "travel-planner",
-      // Replace with the id printed by `wrangler d1 create travel-planner` before deploying.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "5cdbd68a-a979-4594-a8e2-c37ae609e5f9",
       "migrations_dir": "migrations"
     }
   ],
