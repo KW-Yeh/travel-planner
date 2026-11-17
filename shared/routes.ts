@@ -77,6 +77,15 @@ export function shownMode(leg: { mode: LegMode; steps: string | null }): LegMode
   }
 }
 
+/**
+ * Whether an automatic re-lookup may be written to a leg. A real route always may; an empty
+ * answer (no route, out of range) only records the attempt on a leg with nothing saved, so a
+ * failed lookup on one device can never wipe a route and sync the loss to the others.
+ */
+export function keepsLookup(leg: { minutes: number | null }, result: RouteResult): boolean {
+  return result.status === "ok" || leg.minutes === null;
+}
+
 /** Short text for the timeline row, e.g. the first transit line used. */
 export function primaryLine(steps: RouteStep[]): string {
   const first = steps.find((s) => s.kind === "transit");

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { CompareRequest, CompareResponse, Endpoint, RouteResult } from "../../shared/routes";
+import { keepsLookup, type CompareRequest, type CompareResponse, type Endpoint, type RouteResult } from "../../shared/routes";
 import type { Day, Leg, LegMode, Stop, Trip } from "../../shared/schema";
 import { legsToRefresh, type LegAlternative } from "../../shared/timeline";
 import { apiRequest } from "../api/client";
@@ -97,8 +97,9 @@ export function useAutoRefreshLegs(bundle: TripBundle, day: Day | null, enabled:
           const result = res.results[leg.mode];
           if (!result || result.status === "error" || result.status === "not_configured") return;
           const current = await db.legs.get(leg.id);
-          // The user may have switched this leg to manual while the request was out.
-          if (current && current.source === "google" && current.deleted === 0) {
+          // The user may have switched this leg to manual while the request was out, and an
+          // empty answer must not replace a route that is already saved (it would sync everywhere).
+          if (current && current.source === "google" && current.deleted === 0 && keepsLookup(current, result)) {
             await applyGoogleResult(current, leg.mode, result, item.departAt);
           }
         })
