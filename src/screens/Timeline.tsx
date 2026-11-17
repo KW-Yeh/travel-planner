@@ -9,7 +9,7 @@ import { KIND_LABEL, MODE_SHORT } from "../data/labels";
 import { stopsOfDay } from "../data/queries";
 import { dayTimeline, tripDateText } from "../data/summary";
 import { useTripContext } from "./TripLayout";
-import { primaryLine, type RouteStep } from "../../shared/routes";
+import { primaryLine, shownMode, type RouteStep } from "../../shared/routes";
 import { useMapsConfig } from "../maps/google";
 import { knownAlternatives, switchLegMode, useAutoRefreshLegs } from "../maps/routes";
 import { dragScroll } from "../components/dragScroll";
@@ -61,7 +61,11 @@ function LegRow({ leg, tripId, daySearch, onCreate }: { leg: Leg | null | undefi
         <Link to={`/trips/${tripId}/legs/${leg.id}${daySearch}`} className={styles.leg}>
           {leg.minutes === null
             ? content("交通時間未定", "點此設定", leg.mode)
-            : content(`${MODE_SHORT[leg.mode]} ${leg.minutes} 分`, legDetail(leg), leg.mode)}
+            : (() => {
+                // A transit lookup that found no ride is shown as walking, not as transit.
+                const mode = shownMode(leg);
+                return content(`${MODE_SHORT[mode]} ${leg.minutes} 分`, mode === leg.mode ? legDetail(leg) : "不需搭車", mode);
+              })()}
           {leg.note && <span className={styles.legNote}>{leg.note}</span>}
         </Link>
       ) : (

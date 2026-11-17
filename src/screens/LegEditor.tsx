@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { directionsUrl } from "../../shared/maps-links";
-import type { CompareResponse, Endpoint, RouteResult, RouteStep } from "../../shared/routes";
+import { isWalkOnly, type CompareResponse, type Endpoint, type RouteResult, type RouteStep } from "../../shared/routes";
 import { LEG_MODES, type Leg, type LegMode, type Stop } from "../../shared/schema";
 import { formatHhmm, zonedToEpoch } from "../../shared/time";
 import { parseTrack } from "../../shared/track";
@@ -19,11 +19,12 @@ type Lookup =
   | { state: "done"; res: CompareResponse }
   | { state: "unavailable"; reason: string };
 
-function resultLabel(r: RouteResult | undefined): string {
+function resultLabel(r: RouteResult | undefined, mode: LegMode): string {
   if (!r) return "—";
   switch (r.status) {
     case "ok":
-      return `${r.minutes} 分`;
+      // A transit lookup that found no ride: say so instead of passing walking off as transit.
+      return mode === "transit" && isWalkOnly(r.steps) ? `步行 ${r.minutes} 分` : `${r.minutes} 分`;
     case "no_route":
       return "查無路線";
     case "out_of_range":
@@ -234,7 +235,7 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
                     {MODE_LABEL[m]}
                   </span>
                   <span className={styles.modeTime}>
-                    {lookup.state === "loading" ? "查詢中…" : lookup.state === "done" ? resultLabel(r) : ""}
+                    {lookup.state === "loading" ? "查詢中…" : lookup.state === "done" ? resultLabel(r, m) : ""}
                   </span>
                 </button>
               );
@@ -253,6 +254,7 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
               </h2>
               <span className="hint">{fromNavitime ? "路線資料：NAVITIME" : "Google 路線"}</span>
             </div>
+            {mode === "transit" && isWalkOnly(steps) && <p className="hint">這段距離沒有適合的大眾運輸，查到的路線是全程步行。</p>}
             <StepList steps={steps} departure={departure} />
             {mode === "transit" && canLookup && !isManual && (
               <button type="button" className={styles.refresh} disabled={refreshing || lookup.state === "loading"} onClick={() => void refreshTransit()}>

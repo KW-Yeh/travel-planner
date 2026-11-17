@@ -62,6 +62,21 @@ export type ConfigResponse = { mapsBrowserKey: string | null; mapId: string | nu
 export const TRANSIT_PAST_MS = 7 * 86_400_000;
 export const TRANSIT_FUTURE_MS = 100 * 86_400_000;
 
+/** A transit lookup can come back as "just walk" (no ride at all); true for such results. */
+export function isWalkOnly(steps: RouteStep[]): boolean {
+  return steps.length > 0 && steps.every((s) => s.kind !== "transit");
+}
+
+/** The mode to show for a leg: a transit leg whose route has no ride is shown as walking. */
+export function shownMode(leg: { mode: LegMode; steps: string | null }): LegMode {
+  if (leg.mode !== "transit" || !leg.steps) return leg.mode;
+  try {
+    return isWalkOnly(JSON.parse(leg.steps) as RouteStep[]) ? "walk" : leg.mode;
+  } catch {
+    return leg.mode;
+  }
+}
+
 /** Short text for the timeline row, e.g. the first transit line used. */
 export function primaryLine(steps: RouteStep[]): string {
   const first = steps.find((s) => s.kind === "transit");

@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { directionsUrl } from "../../shared/maps-links";
 import type { Day, Leg, Stop } from "../../shared/schema";
 import { describeDate, formatHhmm } from "../../shared/time";
+import { shownMode } from "../../shared/routes";
 import { parseTrack } from "../../shared/track";
 import { BackIcon, ModeIcon, NavigateIcon } from "../components/icons";
 import { MODE_LABEL } from "../data/labels";
@@ -83,7 +84,7 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
       for (const row of rows) {
         const color = DAY_COLORS[row.dayIndex % DAY_COLORS.length] ?? "#1d4ed8";
         if (row.prev && hasCoords(row.prev) && hasCoords(row.stop)) {
-          const walking = row.legIn?.mode === "walk";
+          const walking = row.legIn ? shownMode(row.legIn) === "walk" : false;
           const dashes = walking ? [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 0.9, strokeColor: color, scale: 3 }, offset: "0", repeat: "12px" }] : [];
           const from = { lat: row.prev.lat, lng: row.prev.lng };
           const to = { lat: row.stop.lat, lng: row.stop.lng };
@@ -239,13 +240,14 @@ export function MapView() {
           {rows.map((row) => {
             const color = DAY_COLORS[row.dayIndex % DAY_COLORS.length];
             const firstOfDay = scope === ALL && row.number === 1;
+            const legMode = row.legIn ? shownMode(row.legIn) : "transit";
             return (
               <li key={row.stop.id} className={styles.item} aria-current={selected === row.stop.id ? "true" : undefined}>
                 {firstOfDay && <h2 className={styles.dayHead}>Day {row.dayIndex + 1}</h2>}
                 {row.prev && (
-                  <a className={styles.leg} href={directionsUrl(place(row.prev), place(row.stop), row.legIn?.mode ?? "transit")} target="_blank" rel="noopener noreferrer">
-                    <ModeIcon mode={row.legIn?.mode ?? "transit"} size={16} />
-                    {MODE_LABEL[row.legIn?.mode ?? "transit"]}
+                  <a className={styles.leg} href={directionsUrl(place(row.prev), place(row.stop), legMode)} target="_blank" rel="noopener noreferrer">
+                    <ModeIcon mode={legMode} size={16} />
+                    {MODE_LABEL[legMode]}
                     {row.legIn?.minutes != null ? ` ${String(row.legIn.minutes)} 分` : ""}
                     <span className={styles.legGo}>
                       <NavigateIcon size={14} /> 導航
