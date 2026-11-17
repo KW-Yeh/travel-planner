@@ -59,7 +59,7 @@
 }
 
 .form > * {
-  animation: rise 0.5s var(--ease-out) both;
+  animation: global(rise) 0.5s var(--ease-out) both;
 }
 .form > :nth-child(2) {
   animation-delay: 0.06s;
@@ -94,13 +94,17 @@
 }
 
 .input:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 1px;
   border-color: var(--color-primary);
 }
 
 .primary {
   height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin-top: 6px;
   border: 0;
   border-radius: var(--radius-md);
@@ -113,8 +117,17 @@
 }
 
 .primary:disabled {
-  background: #4b67c9;
+  opacity: var(--disabled-opacity);
   cursor: not-allowed;
+}
+.primary[aria-busy="true"] {
+  opacity: 1;
+  cursor: progress;
+}
+@media (hover: hover) and (pointer: fine) {
+  .primary:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
 }
 
 .primary:focus-visible {

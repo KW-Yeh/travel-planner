@@ -13,6 +13,7 @@ import { primaryLine, shownMode, type RouteStep } from "../../shared/routes";
 import { useMapsConfig } from "../maps/google";
 import { knownAlternatives, switchLegMode, useAutoRefreshLegs } from "../maps/routes";
 import { dragScroll } from "../components/dragScroll";
+import { useFlip } from "../components/flip";
 import styles from "./Timeline.module.css";
 
 function TimeText({ minutes, danger }: { minutes: number | null; danger?: boolean }) {
@@ -169,6 +170,7 @@ export function Timeline({ embedded = false }: { embedded?: boolean }) {
   const openStopId = useMatch("/trips/:tripId/stops/:stopId")?.params.stopId;
 
   const stops = day ? stopsOfDay(bundle, day.id) : [];
+  const flipMove = useFlip(rowRefs, stops.map((s) => s.id).join());
   const unscheduled = stopsOfDay(bundle, null);
   const config = useMapsConfig();
   useAutoRefreshLegs(bundle, day, config?.routesEnabled ?? false);
@@ -360,7 +362,10 @@ export function Timeline({ embedded = false }: { embedded?: boolean }) {
                         className="icon-btn"
                         aria-label={`${stop.name} 上移`}
                         disabled={index === 0}
-                        onClick={() => void moveStop(stop, index - 1)}
+                        onClick={() => {
+                          flipMove();
+                          void moveStop(stop, index - 1);
+                        }}
                       >
                         <UpIcon />
                       </button>
@@ -369,7 +374,10 @@ export function Timeline({ embedded = false }: { embedded?: boolean }) {
                         className="icon-btn"
                         aria-label={`${stop.name} 下移`}
                         disabled={index === stops.length - 1}
-                        onClick={() => void moveStop(stop, index + 1)}
+                        onClick={() => {
+                          flipMove();
+                          void moveStop(stop, index + 1);
+                        }}
                       >
                         <DownIcon />
                       </button>

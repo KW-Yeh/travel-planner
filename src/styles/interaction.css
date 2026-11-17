@@ -1,0 +1,126 @@
+/* Interaction states for the shared building blocks: keyboard focus, disabled, desktop hover, busy.
+   Hover rules sit inside a fine-pointer media query so a tap on a phone never leaves a stuck highlight,
+   and use :where() so selected states ([aria-pressed], [data-state="on"], …) and screen modules win. */
+
+/* Fallback ring for anything focusable that has no ring of its own (zero specificity: any rule that styles or removes it wins). */
+:where(:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Disabled: one look for every control. */
+.btn:disabled,
+.chip:disabled,
+.icon-btn:disabled,
+.topbar-text-btn:disabled,
+.row-button:disabled,
+.option:disabled,
+.tile[data-disabled],
+.segment[data-disabled],
+.switch[data-disabled],
+[aria-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:where(:hover:not(:disabled)) {
+    background: var(--color-primary-hover);
+  }
+  .btn-outline:where(:hover:not(:disabled)) {
+    background: var(--color-primary-soft);
+  }
+  .btn-quiet:where(:hover:not(:disabled)) {
+    border-color: rgb(21 32 43 / 0.2);
+    background: rgb(255 255 255 / 0.9);
+  }
+  .btn-danger:where(:hover:not(:disabled)) {
+    background: var(--color-danger-soft);
+  }
+
+  .icon-btn:where(:hover:not(:disabled)),
+  .topbar-text-btn:where(:hover:not(:disabled)),
+  .row-button:where(:hover:not(:disabled)),
+  .stepper button:where(:hover:not(:disabled)),
+  .option:where(:hover:not(:disabled)),
+  .command-item:where(:hover),
+  .calendar .rdp-button_previous:where(:hover:not(:disabled)),
+  .calendar .rdp-button_next:where(:hover:not(:disabled)),
+  .calendar .rdp-day_button:where(:hover:not(:disabled)) {
+    background: var(--hover-tint);
+  }
+  .calendar .rdp-dropdown_root:hover .rdp-caption_label {
+    background: rgb(21 32 43 / 0.1);
+  }
+
+  .options.grid .option:where(:hover:not([aria-checked="true"])) {
+    border-color: rgb(21 32 43 / 0.25);
+    background: rgb(244 246 249);
+  }
+
+  .chip:where(:hover:not(:disabled)) {
+    border-color: rgb(21 32 43 / 0.22);
+    background: rgb(255 255 255 / 0.85);
+  }
+  .tile:where(:hover:not([data-disabled])) {
+    background: rgb(21 32 43 / 0.1);
+  }
+  .segment:where(:hover:not([data-disabled])) {
+    background: rgb(255 255 255 / 0.55);
+    color: var(--color-ink);
+  }
+  .switch:where(:hover:not([data-disabled])) {
+    filter: brightness(0.94);
+  }
+
+  /* Cards lift a little; `translate` stays separate from the press `transform`. */
+  .card-link:where(:hover) {
+    translate: 0 -2px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      0 14px 32px rgb(21 32 43 / 0.12);
+  }
+}
+
+/* Busy indicator: a ring that inherits the text colour. Under reduced motion it stays as a still ring. */
+@keyframes spin {
+  to {
+    rotate: 1turn;
+  }
+}
+.spinner {
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -0.125em;
+  animation: spin 0.7s linear infinite;
+}
+
+/* Route changes cross-fade (React <ViewTransition> around the routes, see App.tsx). */
+::view-transition-old(.route) {
+  animation: route-out 0.16s ease-in both;
+}
+::view-transition-new(.route) {
+  animation: route-in 0.24s var(--ease-out) both;
+}
+@keyframes route-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes route-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

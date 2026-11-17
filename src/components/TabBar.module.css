@@ -39,8 +39,15 @@
   text-decoration: none;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .tab:hover:not(.active) {
+    background: var(--hover-tint);
+    color: var(--color-ink);
+  }
+}
+
 .tab:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 1px;
 }
 

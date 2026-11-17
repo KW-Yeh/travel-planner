@@ -124,7 +124,9 @@ export function Login({ offline = false }: { offline?: boolean }) {
               type="submit"
               className={styles.primary}
               disabled={submitting || locked}
+              aria-busy={submitting}
             >
+              {submitting && !locked && <span className="spinner" aria-hidden="true" />}
               {locked ? "暫時鎖定中" : submitting ? "登入中…" : "登入"}
             </button>
             <p className={styles.note}>這台裝置會保持登入 30 天。</p>

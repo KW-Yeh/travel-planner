@@ -52,6 +52,7 @@ export function PlaceSearch({ bias, onPick, quick = [] }: Props) {
   const [active, setActive] = useState(-1);
   const [message, setMessage] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [searching, setSearching] = useState(false);
   const token = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const key = config?.mapsBrowserKey ?? null;
   const searchable = Boolean(key && online);
@@ -63,6 +64,7 @@ export function PlaceSearch({ bias, onPick, quick = [] }: Props) {
     if (!key || !online || looksLikeLink || text.trim().length < MIN_CHARS) return;
     let cancelled = false;
     const timer = setTimeout(() => {
+      setSearching(true);
       void (async () => {
         const { AutocompleteSessionToken, AutocompleteSuggestion } = await mapsLibrary(key, "places");
         token.current ??= new AutocompleteSessionToken();
@@ -78,13 +80,18 @@ export function PlaceSearch({ bias, onPick, quick = [] }: Props) {
           ),
         );
         setActive(-1);
-      })().catch(() => {
-        if (!cancelled) setMessage("搜尋失敗，請稍後再試或直接輸入名稱。");
-      });
+      })()
+        .catch(() => {
+          if (!cancelled) setMessage("搜尋失敗，請稍後再試或直接輸入名稱。");
+        })
+        .finally(() => {
+          if (!cancelled) setSearching(false);
+        });
     }, DEBOUNCE_MS);
     return () => {
       cancelled = true;
       clearTimeout(timer);
+      setSearching(false);
     };
   }, [key, online, looksLikeLink, text, biasLat, biasLng]);
 
@@ -197,6 +204,7 @@ export function PlaceSearch({ bias, onPick, quick = [] }: Props) {
           }}
           onKeyDown={onKeyDown}
         />
+        {searching && <span className={`spinner ${styles.spinner}`} role="status" aria-label="搜尋中" />}
       </div>
       {looksLikeLink && (
         <button type="button" className="btn btn-outline" onClick={() => void applyLink()}>

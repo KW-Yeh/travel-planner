@@ -53,12 +53,18 @@
   color: var(--color-ink);
   text-decoration: none;
 }
-.tab:hover {
-  background: rgb(21 32 43 / 0.05);
+@media (hover: hover) and (pointer: fine) {
+  .tab:hover,
+  .back:hover {
+    background: var(--hover-tint);
+  }
+  .back:hover {
+    color: var(--color-ink);
+  }
 }
 .back:focus-visible,
 .tab:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: -3px;
 }
 .active,

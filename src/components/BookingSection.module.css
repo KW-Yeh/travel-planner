@@ -96,7 +96,17 @@ button.fileName {
   font-size: 11px;
   color: var(--color-ink-muted);
 }
+@media (hover: hover) and (pointer: fine) {
+  button.fileName:hover strong {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+  .attach:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+}
 .attach:focus-within {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }

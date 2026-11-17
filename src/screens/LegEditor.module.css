@@ -31,7 +31,7 @@
   background: var(--color-primary-soft);
 }
 .mode:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }
 .modeName {
@@ -49,6 +49,14 @@
   font-size: 18px;
   font-weight: 700;
   min-height: 24px;
+}
+.searching {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink-muted);
 }
 
 .route {
@@ -110,6 +118,9 @@
 }
 .refresh {
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-height: var(--tap-min);
   padding: 0 14px;
   border-radius: 12px;
@@ -121,12 +132,26 @@
   font-weight: 700;
   cursor: pointer;
 }
-.refresh:disabled {
-  opacity: 0.5;
-  cursor: default;
+.refresh:disabled,
+.mode:disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+.refresh[aria-busy="true"] {
+  opacity: 1;
+  cursor: progress;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mode:hover:not(:disabled, [aria-pressed="true"]) {
+    border-color: rgb(29 78 216 / 0.45);
+    background: rgb(255 255 255 / 0.85);
+  }
+  .refresh:hover:not(:disabled) {
+    background: var(--color-primary-soft);
+  }
 }
 .refresh:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }
 .stepBody span {

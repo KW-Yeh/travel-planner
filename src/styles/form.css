@@ -49,7 +49,7 @@
   cursor: pointer;
 }
 .row-button:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: -3px;
 }
 .row-label {
@@ -133,7 +133,7 @@
   line-height: 1.5;
 }
 .group .textarea:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: -3px;
 }
 .icon-tile {
@@ -180,7 +180,7 @@
   background: var(--color-primary);
 }
 .switch:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }
 .switch-thumb {
@@ -226,7 +226,7 @@
 }
 .tile:focus-visible,
 .segment:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -284,11 +284,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 .stepper button:disabled {
   color: rgb(21 32 43 / 0.3);
-  cursor: default;
+  cursor: not-allowed;
 }
 .stepper output {
   min-width: 32px;
@@ -405,7 +406,7 @@
   color: #fff;
 }
 .option:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 1px;
 }
 
@@ -422,7 +423,7 @@
   color: var(--color-ink);
 }
 .command-input:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 1px;
 }
 .command-list {
@@ -556,7 +557,7 @@
   height: 12px;
 }
 .calendar .rdp-dropdown_root:has(.rdp-dropdown:focus-visible) .rdp-caption_label {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
 }
 .calendar .rdp-month_grid {
   width: 100%;
@@ -586,7 +587,7 @@
   cursor: pointer;
 }
 .calendar .rdp-day_button:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: 1px;
 }
 .calendar .rdp-outside .rdp-day_button {

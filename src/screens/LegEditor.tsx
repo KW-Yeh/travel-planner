@@ -235,7 +235,16 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
                     {MODE_LABEL[m]}
                   </span>
                   <span className={styles.modeTime}>
-                    {lookup.state === "loading" ? "查詢中…" : lookup.state === "done" ? resultLabel(r, m) : ""}
+                    {lookup.state === "loading" ? (
+                      <span className={styles.searching}>
+                        <span className="spinner" aria-hidden="true" />
+                        查詢中…
+                      </span>
+                    ) : lookup.state === "done" ? (
+                      resultLabel(r, m)
+                    ) : (
+                      ""
+                    )}
                   </span>
                 </button>
               );
@@ -257,7 +266,8 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
             {mode === "transit" && isWalkOnly(steps) && <p className="hint">這段距離沒有適合的大眾運輸，查到的路線是全程步行。</p>}
             <StepList steps={steps} departure={departure} />
             {mode === "transit" && canLookup && !isManual && (
-              <button type="button" className={styles.refresh} disabled={refreshing || lookup.state === "loading"} onClick={() => void refreshTransit()}>
+              <button type="button" className={styles.refresh} disabled={refreshing || lookup.state === "loading"} aria-busy={refreshing} onClick={() => void refreshTransit()}>
+                {refreshing && <span className="spinner" aria-hidden="true" />}
                 {refreshing ? "查詢中…" : "重新查詢"}
               </button>
             )}

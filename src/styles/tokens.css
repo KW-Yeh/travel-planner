@@ -27,5 +27,11 @@
 
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 
+  /* Interaction states (desktop hover, disabled, keyboard focus). */
+  --color-primary-hover: #1e40af;
+  --hover-tint: rgb(21 32 43 / 0.06);
+  --disabled-opacity: 0.45;
+  --focus-ring: 3px solid var(--color-primary);
+
   --font-sans: "Inter", "Noto Sans TC", system-ui, sans-serif;
 }

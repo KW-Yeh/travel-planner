@@ -5,11 +5,28 @@
 }
 
 .map {
+  position: relative;
   height: min(52vh, 460px);
   margin: 10px 16px 0;
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--color-line);
+}
+/* While Google Maps loads: a soft placeholder with a spinner (the map's own nodes replace it). */
+.map[aria-busy="true"] {
+  background: rgb(255 255 255 / 0.45);
+}
+.map[aria-busy="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 28px;
+  height: 28px;
+  margin: auto;
+  border: 3px solid var(--color-primary);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: global(spin) 0.7s linear infinite;
 }
 
 .fallback {
@@ -76,8 +93,13 @@
   text-align: left;
   cursor: pointer;
 }
+@media (hover: hover) and (pointer: fine) {
+  .stop:hover {
+    background: var(--hover-tint);
+  }
+}
 .stop:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: var(--focus-ring);
   outline-offset: -3px;
 }
 

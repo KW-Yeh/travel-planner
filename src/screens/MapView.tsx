@@ -52,6 +52,7 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
   const map = useRef<google.maps.Map | null>(null);
   const overlays = useRef<{ clear: () => void }[]>([]);
   const [failed, setFailed] = useState(false);
+  const [ready, setReady] = useState(false);
   const onSelectRef = useRef(onSelect);
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -75,6 +76,7 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
         gestureHandling: "greedy",
         clickableIcons: false,
       });
+      setReady(true);
       for (const o of overlays.current) o.clear();
       overlays.current = [];
       const bounds = new LatLngBounds();
@@ -159,7 +161,7 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
   }, [rows, selected]);
 
   if (failed) return <p className="hint">地圖載入失敗，下方仍可查看行程清單。</p>;
-  return <div ref={container} className={styles.map} role="region" aria-label="行程地圖" />;
+  return <div ref={container} className={styles.map} role="region" aria-label="行程地圖" aria-busy={!ready} />;
 }
 
 function useFallback(rows: Row[]): string | null {

@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import type { MeResponse } from "../shared/api";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
@@ -12,21 +13,25 @@ import { TripLayout } from "./screens/TripLayout";
 import { Trips } from "./screens/Trips";
 
 function SignedInRoutes({ user }: { user: MeResponse }) {
+  // BrowserRouter commits each navigation inside startTransition, so this boundary cross-fades
+  // route changes (see `.route` in styles/interaction.css); browsers without the API just swap.
   return (
-    <Routes>
-      <Route path="/" element={<Trips user={user} />} />
-      <Route path="/trips/new" element={<TripForm />} />
-      <Route path="/trips/:tripId/edit" element={<TripForm />} />
-      <Route path="/trips/:tripId" element={<TripLayout />}>
-        <Route index element={<Timeline />} />
-        <Route path="stops/new" element={<StopEditor />} />
-        <Route path="stops/:stopId" element={<StopEditor />} />
-        <Route path="legs/:legId" element={<LegEditor />} />
-        <Route path="map" element={<MapView />} />
-        <Route path="bookings" element={<Bookings />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <ViewTransition default="route">
+      <Routes>
+        <Route path="/" element={<Trips user={user} />} />
+        <Route path="/trips/new" element={<TripForm />} />
+        <Route path="/trips/:tripId/edit" element={<TripForm />} />
+        <Route path="/trips/:tripId" element={<TripLayout />}>
+          <Route index element={<Timeline />} />
+          <Route path="stops/new" element={<StopEditor />} />
+          <Route path="stops/:stopId" element={<StopEditor />} />
+          <Route path="legs/:legId" element={<LegEditor />} />
+          <Route path="map" element={<MapView />} />
+          <Route path="bookings" element={<Bookings />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ViewTransition>
   );
 }
 
