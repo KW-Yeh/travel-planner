@@ -14,3 +14,6 @@ GOOGLE_ROUTES_KEY=
 GOOGLE_MAPS_BROWSER_KEY=
 # Map ID for Advanced Markers (DEMO_MAP_ID works for local development)
 GOOGLE_MAP_ID=
+
+# RapidAPI key for NAVITIME Route (totalnavi): Japan transit routes (server-side only)
+RAPIDAPI_KEY=

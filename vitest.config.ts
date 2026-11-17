@@ -26,6 +26,7 @@ export default defineConfig({
                 GOOGLE_ROUTES_KEY: "",
                 GOOGLE_MAPS_BROWSER_KEY: "",
                 GOOGLE_MAP_ID: "",
+                RAPIDAPI_KEY: "",
               },
             },
           })),

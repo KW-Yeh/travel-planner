@@ -24,7 +24,8 @@
   "vars": {
     // Hours to cache Google route results in D1. 0 = off: Google's policies list place IDs
     // and coordinates (30 days) as cacheable, but not route results.
-    "ROUTE_CACHE_TTL_HOURS": "0"
+    "ROUTE_CACHE_TTL_HOURS": "0",
+    "NAVITIME_CACHE_TTL_DAYS": "30"
   },
   "observability": {
     "enabled": true

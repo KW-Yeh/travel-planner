@@ -1,0 +1,1594 @@
+{
+ "items": [
+  {
+   "summary": {
+    "no": "1",
+    "start": {
+     "type": "point",
+     "coord": {
+      "lat": 35.681236,
+      "lon": 139.767125
+     },
+     "name": "start"
+    },
+    "goal": {
+     "type": "point",
+     "coord": {
+      "lat": 35.689592,
+      "lon": 139.700413
+     },
+     "name": "goal"
+    },
+    "move": {
+     "transit_count": 0,
+     "walk_distance": 349,
+     "fare": {
+      "unit_0": 260,
+      "unit_1": 0,
+      "unit_3": 1010,
+      "unit_48": 253,
+      "unit_51": 750,
+      "unit_128_train": 7840,
+      "unit_130_train": 22340,
+      "unit_133_train": 41630
+     },
+     "type": "move",
+     "from_time": "2026-11-18T09:00:00+09:00",
+     "to_time": "2026-11-18T09:26:00+09:00",
+     "time": 26,
+     "distance": 10649,
+     "move_type": [
+      "rapid_train",
+      "walk"
+     ],
+     "reference_fare": {
+      "lowest_total_ticket": 260,
+      "lowest_total_ic": 253
+     }
+    }
+   },
+   "sections": [
+    {
+     "type": "point",
+     "coord": {
+      "lat": 35.681236,
+      "lon": 139.767125
+     },
+     "name": "start"
+    },
+    {
+     "type": "move",
+     "move": "walk",
+     "from_time": "2026-11-18T09:00:00+09:00",
+     "to_time": "2026-11-18T09:05:00+09:00",
+     "time": 5,
+     "distance": 275,
+     "line_name": "徒歩"
+    },
+    {
+     "type": "point",
+     "coord": {
+      "lat": 35.680575,
+      "lon": 139.76861
+     },
+     "name": "東京",
+     "node_id": "00006668",
+     "node_types": [
+      "station"
+     ],
+     "gateway": "八重洲中央口",
+     "numbering": {
+      "departure": [
+       {
+        "symbol": "JC",
+        "number": "01"
+       }
+      ]
+     }
+    },
+    {
+     "type": "move",
+     "transport": {
+      "fare": {
+       "unit_0": 260,
+       "unit_1": 0,
+       "unit_128": 7840,
+       "unit_130": 22340,
+       "unit_133": 41630,
+       "unit_136": 5710,
+       "unit_138": 16280,
+       "unit_141": 30830,
+       "unit_144": 5130,
+       "unit_146": 14650,
+       "unit_149": 27740,
+       "unit_152": 3990,
+       "unit_154": 11390,
+       "unit_157": 21580,
+       "unit_160": 6660,
+       "unit_162": 18980,
+       "unit_165": 35380,
+       "unit_3": 1010,
+       "unit_48": 253,
+       "unit_51": 750
+      },
+      "getoff": "中・後",
+      "color": "#F15A22",
+      "name": "ＪＲ中央線快速",
+      "fare_season": "slack",
+      "company": {
+       "id": "00000004",
+       "name": "ＪＲ東日本"
+      },
+      "links": [
+       {
+        "id": "00000176",
+        "name": "ＪＲ中央本線（東京-塩尻）",
+        "direction": "down",
+        "destination": {
+         "id": "00004254",
+         "name": "新宿"
+        },
+        "from": {
+         "id": "00006668",
+         "name": "東京"
+        },
+        "to": {
+         "id": "00004254",
+         "name": "新宿"
+        },
+        "is_timetable": "false",
+        "way": "新宿,八王子"
+       }
+      ],
+      "id": "00000328",
+      "type": "快速",
+      "fare_break": {
+       "unit_0": true,
+       "unit_1": true,
+       "unit_128": true,
+       "unit_130": true,
+       "unit_133": true,
+       "unit_136": true,
+       "unit_138": true,
+       "unit_141": true,
+       "unit_144": true,
+       "unit_146": true,
+       "unit_149": true,
+       "unit_152": true,
+       "unit_154": true,
+       "unit_157": true,
+       "unit_160": true,
+       "unit_162": true,
+       "unit_165": true,
+       "unit_3": true,
+       "unit_48": true,
+       "unit_51": true
+      },
+      "fare_detail": [
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "0",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 260
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "48",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 253
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "128",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 7840
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "130",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 22340
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "133",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 41630
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "136",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 5710
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "138",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 16280
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "141",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 30830
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "144",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 5130
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "146",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 14650
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "149",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 27740
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "152",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 3990
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "154",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 11390
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "157",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 21580
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "160",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 6660
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "162",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 18980
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "165",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 35380
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "1",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 0,
+        "default_extra_fare": true
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "3",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 1010
+       },
+       {
+        "start": {
+         "name": "東京",
+         "node_id": "00006668"
+        },
+        "id": "51",
+        "goal": {
+         "name": "新宿",
+         "node_id": "00004254"
+        },
+        "fare": 750
+       }
+      ]
+     },
+     "move": "rapid_train",
+     "from_time": "2026-11-18T09:07:00+09:00",
+     "to_time": "2026-11-18T09:22:00+09:00",
+     "time": 15,
+     "distance": 10300,
+     "line_name": "ＪＲ中央線快速"
+    },
+    {
+     "type": "point",
+     "coord": {
+      "lat": 35.689262,
+      "lon": 139.700321
+     },
+     "name": "新宿",
+     "node_id": "00004254",
+     "node_types": [
+      "station"
+     ],
+     "gateway": "南口",
+     "numbering": {
+      "arrival": [
+       {
+        "symbol": "JC",
+        "number": "05"
+       },
+       {
+        "symbol": "JB",
+        "number": "10"
+       }
+      ]
+     }
+    },
+    {
+     "type": "move",
+     "move": "walk",
+     "from_time": "2026-11-18T09:22:00+09:00",
+     "to_time": "2026-11-18T09:26:00+09:00",
+     "time": 4,
+     "distance": 74,
+     "line_name": "徒歩"
+    },
+    {
+     "type": "point",
+     "coord": {
+      "lat": 35.689592,
+      "lon": 139.700413
+     },
+     "name": "goal"
+    }
+   ],
+   "shapes": {
+    "type": "FeatureCollection",
+    "features": [
+     {
+      "type": "Feature",
+      "bbox": [
+       139.767125,
+       35.68111,
+       139.767796,
+       35.681236
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.767125,
+         35.681236
+        ],
+        [
+         139.767796,
+         35.68111
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "auxiliary",
+        "width": 5,
+        "color": "#D3D3D3",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#898989",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "ways": "walk"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.767796,
+       35.68061,
+       139.768688,
+       35.68111
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.767796,
+         35.68111
+        ],
+        [
+         139.767855,
+         35.681097
+        ],
+        [
+         139.767963,
+         35.681069
+        ],
+        [
+         139.768006,
+         35.681058
+        ],
+        [
+         139.768097,
+         35.681038
+        ],
+        [
+         139.768122,
+         35.681103
+        ],
+        [
+         139.76821,
+         35.681083
+        ],
+        [
+         139.768341,
+         35.681052
+        ],
+        [
+         139.76837,
+         35.681039
+        ],
+        [
+         139.76846,
+         35.681003
+        ],
+        [
+         139.768651,
+         35.680923
+        ],
+        [
+         139.768688,
+         35.680907
+        ],
+        [
+         139.768654,
+         35.680851
+        ],
+        [
+         139.768645,
+         35.680837
+        ],
+        [
+         139.768605,
+         35.680775
+        ],
+        [
+         139.76856,
+         35.680697
+        ],
+        [
+         139.76851,
+         35.68061
+        ]
+       ]
+      },
+      "properties": {
+       "indoor": false,
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#02FA47",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#0A6400",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "restriction": false,
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "ways": "walk"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.766702,
+       35.681713,
+       139.771051,
+       35.69235
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.766702,
+         35.681713
+        ],
+        [
+         139.767283,
+         35.683072
+        ],
+        [
+         139.767513,
+         35.683549
+        ],
+        [
+         139.767645,
+         35.683753
+        ],
+        [
+         139.767987,
+         35.684663
+        ],
+        [
+         139.768983,
+         35.687089
+        ],
+        [
+         139.770341,
+         35.690532
+        ],
+        [
+         139.770474,
+         35.691156
+        ],
+        [
+         139.770733,
+         35.691763
+        ],
+        [
+         139.770908,
+         35.692143
+        ],
+        [
+         139.771051,
+         35.69235
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.763769,
+       35.692343,
+       139.771693,
+       35.69986
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.771041,
+         35.692343
+        ],
+        [
+         139.771529,
+         35.693332
+        ],
+        [
+         139.771691,
+         35.694207
+        ],
+        [
+         139.771693,
+         35.69487
+        ],
+        [
+         139.771628,
+         35.695359
+        ],
+        [
+         139.771487,
+         35.695749
+        ],
+        [
+         139.771258,
+         35.696107
+        ],
+        [
+         139.770909,
+         35.696574
+        ],
+        [
+         139.770536,
+         35.696864
+        ],
+        [
+         139.768742,
+         35.698145
+        ],
+        [
+         139.768207,
+         35.698481
+        ],
+        [
+         139.767634,
+         35.698771
+        ],
+        [
+         139.767272,
+         35.698939
+        ],
+        [
+         139.766841,
+         35.699104
+        ],
+        [
+         139.765312,
+         35.699519
+        ],
+        [
+         139.763769,
+         35.69986
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.753253,
+       35.699864,
+       139.763756,
+       35.701939
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.763756,
+         35.699864
+        ],
+        [
+         139.763294,
+         35.700051
+        ],
+        [
+         139.763007,
+         35.700235
+        ],
+        [
+         139.762166,
+         35.700812
+        ],
+        [
+         139.761843,
+         35.70103
+        ],
+        [
+         139.761434,
+         35.701239
+        ],
+        [
+         139.761017,
+         35.701365
+        ],
+        [
+         139.760522,
+         35.701435
+        ],
+        [
+         139.759466,
+         35.701439
+        ],
+        [
+         139.75854,
+         35.701386
+        ],
+        [
+         139.757517,
+         35.701385
+        ],
+        [
+         139.756828,
+         35.701429
+        ],
+        [
+         139.75615,
+         35.701622
+        ],
+        [
+         139.755065,
+         35.701821
+        ],
+        [
+         139.753253,
+         35.701939
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.744556,
+       35.701348,
+       139.753263,
+       35.702425
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.753263,
+         35.701931
+        ],
+        [
+         139.751331,
+         35.702077
+        ],
+        [
+         139.749577,
+         35.702236
+        ],
+        [
+         139.747229,
+         35.702425
+        ],
+        [
+         139.746731,
+         35.702403
+        ],
+        [
+         139.746272,
+         35.702311
+        ],
+        [
+         139.745792,
+         35.702165
+        ],
+        [
+         139.745358,
+         35.701956
+        ],
+        [
+         139.74493,
+         35.70166
+        ],
+        [
+         139.744556,
+         35.701348
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.735283,
+       35.691037,
+       139.744562,
+       35.701349
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.744562,
+         35.701349
+        ],
+        [
+         139.744285,
+         35.701018
+        ],
+        [
+         139.74393,
+         35.700431
+        ],
+        [
+         139.743536,
+         35.699896
+        ],
+        [
+         139.742308,
+         35.698488
+        ],
+        [
+         139.740192,
+         35.695799
+        ],
+        [
+         139.739361,
+         35.694589
+        ],
+        [
+         139.738481,
+         35.693494
+        ],
+        [
+         139.737887,
+         35.692855
+        ],
+        [
+         139.737057,
+         35.6922
+        ],
+        [
+         139.736027,
+         35.691459
+        ],
+        [
+         139.735283,
+         35.691037
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.730719,
+       35.686071,
+       139.735296,
+       35.691037
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.735296,
+         35.691037
+        ],
+        [
+         139.733669,
+         35.690182
+        ],
+        [
+         139.732586,
+         35.68953
+        ],
+        [
+         139.731999,
+         35.689072
+        ],
+        [
+         139.731744,
+         35.688827
+        ],
+        [
+         139.731355,
+         35.688261
+        ],
+        [
+         139.731185,
+         35.687831
+        ],
+        [
+         139.730981,
+         35.68703
+        ],
+        [
+         139.730719,
+         35.686071
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.721073,
+       35.679819,
+       139.730724,
+       35.686092
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.730724,
+         35.686092
+        ],
+        [
+         139.730284,
+         35.684464
+        ],
+        [
+         139.729839,
+         35.683533
+        ],
+        [
+         139.729557,
+         35.683102
+        ],
+        [
+         139.729082,
+         35.682682
+        ],
+        [
+         139.728168,
+         35.682183
+        ],
+        [
+         139.727218,
+         35.68178
+        ],
+        [
+         139.726467,
+         35.681475
+        ],
+        [
+         139.724284,
+         35.680463
+        ],
+        [
+         139.723407,
+         35.680087
+        ],
+        [
+         139.722667,
+         35.679876
+        ],
+        [
+         139.722324,
+         35.679833
+        ],
+        [
+         139.721926,
+         35.679819
+        ],
+        [
+         139.721463,
+         35.679859
+        ],
+        [
+         139.721073,
+         35.679928
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.710706,
+       35.67994,
+       139.721011,
+       35.681324
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.721011,
+         35.67994
+        ],
+        [
+         139.716158,
+         35.68062
+        ],
+        [
+         139.710706,
+         35.681324
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.702142,
+       35.681339,
+       139.710696,
+       35.684617
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.710696,
+         35.681339
+        ],
+        [
+         139.710096,
+         35.68143
+        ],
+        [
+         139.709559,
+         35.681506
+        ],
+        [
+         139.708383,
+         35.681556
+        ],
+        [
+         139.707057,
+         35.681458
+        ],
+        [
+         139.706441,
+         35.681406
+        ],
+        [
+         139.70545,
+         35.681356
+        ],
+        [
+         139.705029,
+         35.681386
+        ],
+        [
+         139.704525,
+         35.6815
+        ],
+        [
+         139.703868,
+         35.681724
+        ],
+        [
+         139.70321,
+         35.68215
+        ],
+        [
+         139.702837,
+         35.682473
+        ],
+        [
+         139.702664,
+         35.682787
+        ],
+        [
+         139.702351,
+         35.683652
+        ],
+        [
+         139.702142,
+         35.684617
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.700391,
+       35.684617,
+       139.702151,
+       35.690544
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.702151,
+         35.684617
+        ],
+        [
+         139.702014,
+         35.685021
+        ],
+        [
+         139.701867,
+         35.685447
+        ],
+        [
+         139.701648,
+         35.685858
+        ],
+        [
+         139.701294,
+         35.686703
+        ],
+        [
+         139.700866,
+         35.687769
+        ],
+        [
+         139.700575,
+         35.688858
+        ],
+        [
+         139.700468,
+         35.689506
+        ],
+        [
+         139.700412,
+         35.690132
+        ],
+        [
+         139.700391,
+         35.690544
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#004EFF",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#00174C",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "transport_type": "railway",
+       "ways": "transport"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.70036,
+       35.689268,
+       139.700366,
+       35.689296
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.700366,
+         35.689268
+        ],
+        [
+         139.70036,
+         35.689296
+        ]
+       ]
+      },
+      "properties": {
+       "indoor": false,
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#02FA47",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#0A6400",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "restriction": false,
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "ways": "walk"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.700238,
+       35.689296,
+       139.70036,
+       35.689438
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.70036,
+         35.689296
+        ],
+        [
+         139.700343,
+         35.689362
+        ],
+        [
+         139.70025,
+         35.689372
+        ],
+        [
+         139.700238,
+         35.689438
+        ]
+       ]
+      },
+      "properties": {
+       "indoor": false,
+       "inline": {
+        "line_style": "solid",
+        "width": 5,
+        "color": "#02FA47",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#0A6400",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "restriction": false,
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "ways": "walk"
+      }
+     },
+     {
+      "type": "Feature",
+      "bbox": [
+       139.700238,
+       35.689438,
+       139.700413,
+       35.689592
+      ],
+      "geometry": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         139.700238,
+         35.689438
+        ],
+        [
+         139.700413,
+         35.689592
+        ]
+       ]
+      },
+      "properties": {
+       "inline": {
+        "line_style": "auxiliary",
+        "width": 5,
+        "color": "#D3D3D3",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "outline": {
+        "line_style": "solid",
+        "width": 10,
+        "color": "#898989",
+        "opacity": 1,
+        "strokelinecap": "round",
+        "strokelinejoin": "round"
+       },
+       "route_no": "1",
+       "section": "0001,0002,0003",
+       "ways": "walk"
+      }
+     }
+    ],
+    "bbox": [
+     139.700238,
+     35.679819,
+     139.771693,
+     35.702425
+    ]
+   }
+  }
+ ],
+ "unit": {
+  "datum": "wgs84",
+  "coord_unit": "degree",
+  "distance": "metre",
+  "time": "minute",
+  "currency": "JPY"
+ }
+}

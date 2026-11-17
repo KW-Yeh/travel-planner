@@ -16,6 +16,8 @@ export const CompareRequest = z.object({
   /** Planned departure (epoch ms); null when the day has no date. */
   departAt: z.number().int().nullable(),
   modes: z.array(z.enum(LEG_MODES)).min(1).max(4).optional(),
+  /** Skip cached results and ask the provider again. */
+  refresh: z.boolean().optional(),
 });
 export type CompareRequest = z.infer<typeof CompareRequest>;
 
@@ -31,11 +33,22 @@ export type RouteStep =
       from: string | null;
       to: string | null;
       departAt: string | null;
+      /** Line colour (NAVITIME), e.g. "#F15A22". */
+      color?: string | null;
+      /** Exit to take at the arrival station (NAVITIME). */
+      exit?: string | null;
     }
   | { kind: "other"; minutes: number; mode: string };
 
 export type RouteResult =
-  | { status: "ok"; minutes: number; distanceMeters: number; polyline: string | null; steps: RouteStep[] }
+  | {
+      status: "ok";
+      minutes: number;
+      distanceMeters: number;
+      polyline: string | null;
+      steps: RouteStep[];
+      provider?: "google" | "navitime";
+    }
   | { status: "no_route" }
   | { status: "out_of_range" }
   | { status: "not_configured" }

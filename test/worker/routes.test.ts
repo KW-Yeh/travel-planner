@@ -5,6 +5,7 @@ import type { CompareRequest, CompareResponse } from "../../shared/routes";
 import app from "../../worker/index";
 import { computeRoute, normalizeSteps } from "../../worker/routes/google";
 import { isAllowedMapsUrl, resolveShareLink } from "../../worker/routes/links";
+import navitimeFixture from "../fixtures/navitime-tokyo-shinjuku.json";
 import { BASE, api, loggedInCookie } from "./helpers";
 
 const NOW = Date.UTC(2027, 2, 1);
@@ -191,6 +192,52 @@ describe("POST /api/routes/compare", () => {
     expect(spy).toHaveBeenCalledTimes(1);
     expect(second).toEqual(first);
     expect(first.results.walk?.status).toBe("ok");
+  });
+
+  describe("NAVITIME for transit in Japan", () => {
+    const TOKYO = { origin: { lat: 35.681236, lng: 139.767125 }, destination: { lat: 35.689592, lng: 139.700413 } };
+    const rapidCalls = (spy: { mock: { calls: unknown[][] } }) =>
+      spy.mock.calls.filter(([input]) => urlOf(input as RequestInfo).includes("rapidapi.com")).length;
+
+    it("reuses one result for the pair whatever the departure, until asked to refresh", async () => {
+      const cookie = await loggedInCookie();
+      const spy = vi.spyOn(globalThis, "fetch").mockImplementation(() => Promise.resolve(new Response(JSON.stringify(navitimeFixture))));
+      const keys = { RAPIDAPI_KEY: "r", NAVITIME_CACHE_TTL_DAYS: "30" };
+      const at9 = await (await compare(keys, { ...TOKYO, departAt: Date.now() + 86_400_000, modes: ["transit"] }, cookie)).json<CompareResponse>();
+      const at18 = await (await compare(keys, { ...TOKYO, departAt: Date.now() + 5 * 86_400_000, modes: ["transit"] }, cookie)).json<CompareResponse>();
+      expect(rapidCalls(spy)).toBe(1);
+      expect(at18).toEqual(at9);
+      expect(at9.results.transit).toMatchObject({ status: "ok", provider: "navitime", minutes: 26 });
+
+      await compare(keys, { ...TOKYO, departAt: null, modes: ["transit"], refresh: true }, cookie);
+      expect(rapidCalls(spy)).toBe(2);
+    });
+
+    it("does not cache when the TTL is 0", async () => {
+      const cookie = await loggedInCookie();
+      const spy = vi.spyOn(globalThis, "fetch").mockImplementation(() => Promise.resolve(new Response(JSON.stringify(navitimeFixture))));
+      const keys = { RAPIDAPI_KEY: "r", NAVITIME_CACHE_TTL_DAYS: "0" };
+      const body = { ...TOKYO, origin: { lat: 34.98, lng: 135.75 }, departAt: null, modes: ["transit"] };
+      await compare(keys, body, cookie);
+      await compare(keys, body, cookie);
+      expect(rapidCalls(spy)).toBe(2);
+    });
+
+    it("leaves place-only stops and non-transit modes to Google", async () => {
+      const cookie = await loggedInCookie();
+      const spy = vi.spyOn(globalThis, "fetch");
+      const res = await (
+        await compare({ RAPIDAPI_KEY: "r" }, { origin: { placeId: "ChIJ-x" }, destination: TOKYO.destination, departAt: null }, cookie)
+      ).json<CompareResponse>();
+      expect(Object.values(res.results)).toEqual(Array(4).fill({ status: "not_configured" }));
+      expect(rapidCalls(spy)).toBe(0);
+    });
+
+    it("counts routes as enabled with only the RapidAPI key", async () => {
+      const ctx = createExecutionContext();
+      const res = await app.fetch(new Request(`${BASE}/api/config`, { headers: { Cookie: await loggedInCookie() } }), { ...env, RAPIDAPI_KEY: "r" }, ctx);
+      expect(await res.json()).toMatchObject({ routesEnabled: true });
+    });
   });
 });
 
