@@ -12,6 +12,7 @@ import { useTripContext } from "./TripLayout";
 import { primaryLine, type RouteStep } from "../../shared/routes";
 import { useMapsConfig } from "../maps/google";
 import { knownAlternatives, switchLegMode, useAutoRefreshLegs } from "../maps/routes";
+import { dragScroll } from "../components/dragScroll";
 import styles from "./Timeline.module.css";
 
 function TimeText({ minutes, danger }: { minutes: number | null; danger?: boolean }) {
@@ -235,7 +236,7 @@ export function Timeline({ embedded = false }: { embedded?: boolean }) {
       )}
 
       {bundle.days.length > 0 && (
-        <div className={`${styles.days} glass`} role="group" aria-label="選擇日期">
+        <div ref={dragScroll} className={`${styles.days} glass`} role="group" aria-label="選擇日期">
           {bundle.days.map((d, i) => {
             const date = describeDate(d.date);
             const selected = d.id === day?.id;

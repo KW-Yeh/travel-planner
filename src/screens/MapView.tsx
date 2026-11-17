@@ -10,6 +10,7 @@ import { dayTimeline } from "../data/summary";
 import { arcPath } from "../maps/arc";
 import { focusPoints, type FocusPoint } from "../maps/focus";
 import { mapsLibrary, useMapsConfig, useOnline } from "../maps/google";
+import { dragScroll } from "../components/dragScroll";
 import styles from "./MapView.module.css";
 import { useTripContext } from "./TripLayout";
 
@@ -187,7 +188,7 @@ export function MapView() {
         </div>
       </header>
 
-      <div className={`chips ${styles.days}`} role="group" aria-label="選擇日期">
+      <div ref={dragScroll} className={`chips ${styles.days}`} role="group" aria-label="選擇日期">
         {bundle.days.map((d, i) => (
           <button
             key={d.id}

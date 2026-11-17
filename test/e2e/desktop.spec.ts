@@ -45,3 +45,35 @@ test("opening a leg keeps its day selected, and its note shows on the timeline",
   await expect(page.getByRole("button", { name: /Day 2/ })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("link", { name: /大眾運輸 40 分.*JR 奈良線 2 號月台/ })).toBeVisible();
 });
+
+test("a mouse can drag and wheel the day strip to reach later days", async ({ page }) => {
+  await signIn(page);
+  await createTrip(page, "十四天", "2027-04-01", "2027-04-14");
+
+  const strip = page.getByRole("group", { name: "選擇日期" });
+  const lastDay = strip.getByRole("button", { name: /Day 14/ });
+  const scrollLeft = () => strip.evaluate((el) => el.scrollLeft);
+  expect(await strip.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+  expect(await scrollLeft()).toBe(0);
+
+  // Drag left from the middle of the strip: it scrolls, and the drag does not select a day.
+  const box = await strip.boundingBox();
+  if (!box) throw new Error("day strip has no box");
+  const y = box.y + box.height / 2;
+  await page.mouse.move(box.x + box.width - 40, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 40, y, { steps: 10 });
+  await page.mouse.up();
+  const afterDrag = await scrollLeft();
+  expect(afterDrag).toBeGreaterThan(100);
+  await expect(strip.getByRole("button", { name: /Day 1 / })).toHaveAttribute("aria-pressed", "true");
+
+  // A vertical wheel over the strip moves it sideways.
+  await page.mouse.wheel(0, 2000);
+  await expect.poll(scrollLeft).toBeGreaterThan(afterDrag);
+  await expect(lastDay).toBeInViewport();
+
+  // A plain click still selects.
+  await lastDay.click();
+  await expect(lastDay).toHaveAttribute("aria-pressed", "true");
+});

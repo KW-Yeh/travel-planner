@@ -393,3 +393,12 @@ dialog.sheet::backdrop {
   font-size: 12px;
   color: var(--color-ink-muted);
 }
+
+/* Mouse drag-to-scroll strips (see components/dragScroll.ts). */
+[data-dragging="true"] {
+  cursor: grabbing;
+  user-select: none;
+}
+[data-dragging="true"] > * {
+  cursor: grabbing;
+}
