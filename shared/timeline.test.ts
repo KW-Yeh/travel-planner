@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Leg, Reservation, Stop } from "./schema";
-import { computeTimeline, legsToRefresh, type TimelineInput } from "./timeline";
+import { computeTimeline, legsToRefresh, staleTransitLegs, type TimelineInput } from "./timeline";
 import { zonedToEpoch } from "./time";
 
 let seq = 0;
@@ -294,7 +294,7 @@ describe("legsToRefresh", () => {
     ]);
   });
 
-  it("re-queries only transit legs whose departure moved more than 30 minutes", () => {
+  it("never re-queries a saved route, only flags transit whose departure moved more than 30 minutes", () => {
     const { input, legs } = kyotoDay();
     const queriedAt = (m: number) => zonedToEpoch(DATE, m, TZ);
     const [first, second, third] = legs;
@@ -305,7 +305,9 @@ describe("legsToRefresh", () => {
       { ...third, mode: "drive" as const, query_depart_at: queriedAt(8 * 60) },
     ];
     const t = computeTimeline({ ...input, legs: stamped });
-    expect(legsToRefresh(t, DATE, TZ, NOW).map((r) => [r.leg?.id, r.reason])).toEqual([[second.id, "departure_moved"]]);
+    expect(legsToRefresh(t, DATE, TZ, NOW)).toEqual([]);
+    expect([...staleTransitLegs(t, DATE, TZ)]).toEqual([[second.id, queriedAt(10 * 60 + 15)]]);
+    expect(staleTransitLegs(t, null, TZ).size).toBe(0);
   });
 
   it("gives the planned departure as an instant in the trip's time zone", () => {

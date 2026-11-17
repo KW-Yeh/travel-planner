@@ -38,6 +38,14 @@ function offsetMs(epoch: number, timeZone: string): number {
   return asUtc - Math.floor(epoch / 1000) * 1000;
 }
 
+/** Epoch ms → wall-clock date ("YYYY-MM-DD") and minutes after midnight in `timeZone`. */
+export function epochToZoned(epoch: number, timeZone: string): { date: string; minutes: number } {
+  const local = epoch + offsetMs(epoch, timeZone);
+  const dayMs = 86_400_000;
+  const midnight = Math.floor(local / dayMs) * dayMs;
+  return { date: new Date(midnight).toISOString().slice(0, 10), minutes: Math.round((local - midnight) / 60_000) };
+}
+
 /** Wall-clock time in `timeZone` on `date` ("YYYY-MM-DD"), `minutes` after midnight → epoch ms. */
 export function zonedToEpoch(date: string, minutes: number, timeZone: string): number {
   const [y, mo, d] = date.split("-").map(Number);

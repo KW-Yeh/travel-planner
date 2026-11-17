@@ -1,8 +1,8 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { Link, useMatch, useNavigate, useSearchParams } from "react-router";
 import type { Leg, Reservation, Stop } from "../../shared/schema";
-import { dayOffset, describeDate, formatDuration, formatHhmm } from "../../shared/time";
-import { isDayOrigin, type Conflict, type Suggestion, type TimelineEntry } from "../../shared/timeline";
+import { dayOffset, describeDate, epochToZoned, formatDuration, formatHhmm } from "../../shared/time";
+import { isDayOrigin, staleTransitLegs, type Conflict, type Suggestion, type TimelineEntry } from "../../shared/timeline";
 import { BackIcon, ChevronIcon, DownIcon, EditIcon, GripIcon, ModeIcon, PlusIcon, UpIcon, WarningIcon } from "../components/icons";
 import { ensureLeg, moveStop, setDayDepart, setStay } from "../data/actions";
 import { KIND_LABEL, MODE_SHORT } from "../data/labels";
@@ -44,7 +44,29 @@ function legDetail(leg: Leg): string {
   }
 }
 
-function LegRow({ leg, tripId, daySearch, onCreate }: { leg: Leg | null | undefined; tripId: string; daySearch: string; onCreate: () => void }) {
+/** "10:15", or "3/25 10:15" when the route was looked up for another day. */
+function queriedText(epoch: number, date: string, timeZone: string): string {
+  const at = epochToZoned(epoch, timeZone);
+  const time = formatHhmm(at.minutes);
+  if (at.date === date) return time;
+  const [, m, d] = at.date.split("-").map(Number);
+  return `${m}/${d} ${time}`;
+}
+
+function LegRow({
+  leg,
+  tripId,
+  daySearch,
+  staleFrom,
+  onCreate,
+}: {
+  leg: Leg | null | undefined;
+  tripId: string;
+  daySearch: string;
+  /** Set when the saved trains were looked up for another departure, e.g. "10:15". */
+  staleFrom: string | null;
+  onCreate: () => void;
+}) {
   const content = (text: string, detail: string, mode: Leg["mode"]) => (
     <>
       <ModeIcon mode={mode} size={18} />
@@ -67,6 +89,7 @@ function LegRow({ leg, tripId, daySearch, onCreate }: { leg: Leg | null | undefi
                 const mode = shownMode(leg);
                 return content(`${MODE_SHORT[mode]} ${leg.minutes} 分`, mode === leg.mode ? legDetail(leg) : "不需搭車", mode);
               })()}
+          {staleFrom && <span className={styles.legStale}>班次是以 {staleFrom} 出發查的，點此更新</span>}
           {leg.note && <span className={styles.legNote}>{leg.note}</span>}
         </Link>
       ) : (
@@ -175,6 +198,7 @@ export function Timeline({ embedded = false }: { embedded?: boolean }) {
   const config = useMapsConfig();
   useAutoRefreshLegs(bundle, day, config?.routesEnabled ?? false);
   const timeline = day ? dayTimeline(bundle, day, knownAlternatives()) : null;
+  const stale = day && timeline ? staleTransitLegs(timeline, day.date, bundle.trip.time_zone) : new Map<string, number>();
   const reservationsOf = (stopId: string) => bundle.reservations.filter((r) => r.stop_id === stopId);
   const daySearch = day ? `?day=${day.id}` : "";
 
@@ -338,6 +362,10 @@ export function Timeline({ embedded = false }: { embedded?: boolean }) {
                   leg={entry.legIn}
                   tripId={trip.id}
                   daySearch={daySearch}
+                  staleFrom={(() => {
+                    const at = entry.legIn ? stale.get(entry.legIn.id) : undefined;
+                    return at !== undefined && day ? queriedText(at, day.date, bundle.trip.time_zone) : null;
+                  })()}
                   onCreate={() => {
                     const prev = stops[index - 1];
                     if (prev) void ensureLeg(trip.id, prev, stop).then((leg) => navigate(`/trips/${trip.id}/legs/${leg.id}${daySearch}`));

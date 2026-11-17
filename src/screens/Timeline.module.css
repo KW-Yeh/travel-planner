@@ -253,7 +253,8 @@
 .legText {
   font-weight: 700;
 }
-.leg:has(.legNote) {
+.leg:has(.legNote),
+.leg:has(.legStale) {
   flex-wrap: wrap;
   align-content: center;
   padding-block: 10px;
@@ -272,6 +273,13 @@
   line-clamp: 3;
   overflow: hidden;
 }
+.legStale {
+  flex-basis: 100%;
+  padding-left: 26px;
+  font-size: 13px;
+  color: var(--color-danger-text);
+}
+
 .legDetail {
   flex: 1;
   overflow: hidden;

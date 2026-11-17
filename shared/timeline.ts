@@ -139,17 +139,22 @@ export function computeTimeline({ departTime, stops, legs, reservations, alterna
   return { entries, travelMinutes, conflictCount };
 }
 
-export type LegRefresh = { fromStopId: string; toStopId: string; leg: Leg | null; departAt: number | null; reason: "missing" | "unknown" | "departure_moved" };
+export type LegRefresh = { fromStopId: string; toStopId: string; leg: Leg | null; departAt: number | null; reason: "missing" | "unknown" };
 
-export const TRANSIT_REQUERY_MS = 30 * 60_000;
+/** A transit leg queried for a departure more than this far from the planned one shows its trains as outdated. */
+export const TRANSIT_STALE_MS = 30 * 60_000;
 /** A Google leg that came back without a time (no route, too far ahead) is retried at most daily. */
 export const UNKNOWN_RETRY_MS = 24 * 3_600_000;
 
+function plannedDeparture(prev: TimelineEntry, date: string | null, timeZone: string): number | null {
+  return date !== null && prev.departure !== null ? zonedToEpoch(date, prev.departure, timeZone) : null;
+}
+
 /**
- * Legs that need a (re)query after the day changed: consecutive pairs without a leg, Google
- * legs still without a time, and transit legs whose planned departure drifted more than 30 min
- * from the time they were queried for. Manual legs are never re-queried, and driving, walking
- * and cycling (no live traffic) do not depend on the departure time.
+ * Legs that need a lookup after the day changed: consecutive pairs without a leg and Google legs
+ * still without a time. A saved route is never re-queried automatically (each lookup is billed and
+ * travel times barely move with the hour); a drifted transit departure is only flagged, see
+ * `staleTransitLegs`. Manual legs are never re-queried.
  */
 export function legsToRefresh(timeline: Timeline, date: string | null, timeZone: string, now: number): LegRefresh[] {
   const out: LegRefresh[] = [];
@@ -157,25 +162,33 @@ export function legsToRefresh(timeline: Timeline, date: string | null, timeZone:
     if (i === 0) return;
     const prev = timeline.entries[i - 1];
     if (!prev) return;
-    const departAt = date !== null && prev.departure !== null ? zonedToEpoch(date, prev.departure, timeZone) : null;
-    const base = { fromStopId: prev.stop.id, toStopId: entry.stop.id, departAt };
+    const base = { fromStopId: prev.stop.id, toStopId: entry.stop.id, departAt: plannedDeparture(prev, date, timeZone) };
     const leg = entry.legIn ?? null;
     if (!leg) {
       out.push({ ...base, leg: null, reason: "missing" });
       return;
     }
     if (leg.source === "manual") return;
-    if (leg.minutes === null) {
-      if (leg.fetched_at === null || now - leg.fetched_at > UNKNOWN_RETRY_MS) out.push({ ...base, leg, reason: "unknown" });
-      return;
+    if (leg.minutes === null && (leg.fetched_at === null || now - leg.fetched_at > UNKNOWN_RETRY_MS)) {
+      out.push({ ...base, leg, reason: "unknown" });
     }
-    if (
-      leg.mode === "transit" &&
-      departAt !== null &&
-      leg.query_depart_at !== null &&
-      Math.abs(departAt - leg.query_depart_at) > TRANSIT_REQUERY_MS
-    ) {
-      out.push({ ...base, leg, reason: "departure_moved" });
+  });
+  return out;
+}
+
+/**
+ * Transit legs whose saved route was looked up for a departure more than 30 min from the planned
+ * one, so its train times no longer match. Maps leg id → the departure (epoch ms) it was queried for.
+ */
+export function staleTransitLegs(timeline: Timeline, date: string | null, timeZone: string): Map<string, number> {
+  const out = new Map<string, number>();
+  timeline.entries.forEach((entry, i) => {
+    const prev = timeline.entries[i - 1];
+    const leg = entry.legIn;
+    if (i === 0 || !prev || !leg || leg.source !== "google" || leg.mode !== "transit" || leg.minutes === null) return;
+    const departAt = plannedDeparture(prev, date, timeZone);
+    if (departAt !== null && leg.query_depart_at !== null && Math.abs(departAt - leg.query_depart_at) > TRANSIT_STALE_MS) {
+      out.set(leg.id, leg.query_depart_at);
     }
   });
   return out;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { byPosition, keyBetween } from "./position";
-import { dateRange, describeDate, formatDuration, formatHhmm, parseHhmm, zonedToEpoch } from "./time";
+import { dateRange, describeDate, epochToZoned, formatDuration, formatHhmm, parseHhmm, zonedToEpoch } from "./time";
 
 describe("time helpers", () => {
   it("parses and formats HH:MM, wrapping past midnight", () => {
@@ -23,6 +23,12 @@ describe("time helpers", () => {
     expect(zonedToEpoch("2027-03-13", 12 * 60, "America/New_York")).toBe(Date.UTC(2027, 2, 13, 17, 0));
     expect(zonedToEpoch("2027-03-15", 12 * 60, "America/New_York")).toBe(Date.UTC(2027, 2, 15, 16, 0));
     expect(zonedToEpoch("2027-03-26", 0, "Asia/Taipei")).toBe(Date.UTC(2027, 2, 25, 16, 0));
+  });
+
+  it("reads an instant back as trip-local date and wall time", () => {
+    expect(epochToZoned(Date.UTC(2027, 2, 26, 0, 12), "Asia/Tokyo")).toEqual({ date: "2027-03-26", minutes: 9 * 60 + 12 });
+    expect(epochToZoned(Date.UTC(2027, 2, 25, 16, 0), "Asia/Taipei")).toEqual({ date: "2027-03-26", minutes: 0 });
+    expect(epochToZoned(Date.UTC(2027, 2, 15, 16, 0), "America/New_York")).toEqual({ date: "2027-03-15", minutes: 12 * 60 });
   });
 
   it("lists dates inclusively across month ends", () => {
