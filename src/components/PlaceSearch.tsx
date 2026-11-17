@@ -1,11 +1,25 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { parseShareUrl } from "../../shared/maps-links";
+import type { StopKind } from "../../shared/schema";
 import { apiRequest } from "../api/client";
+import { matchPlaces, type TripPlace } from "../data/tripPlaces";
 import { mapsLibrary, useMapsConfig, useOnline } from "../maps/google";
-import { PinIcon, SearchIcon } from "./icons";
+import { KindIcon, PinIcon, SearchIcon } from "./icons";
 import styles from "./PlaceSearch.module.css";
 
-export type PickedPlace = { placeId: string | null; name: string | null; address: string | null; lat: number | null; lng: number | null };
+export type PickedPlace = {
+  placeId: string | null;
+  name: string | null;
+  address: string | null;
+  lat: number | null;
+  lng: number | null;
+  /** Set when reusing a trip place: its original fetch time and kind. */
+  fetchedAt?: number | null;
+  kind?: StopKind;
+};
+
+const QUICK_LIMIT = 8;
+const MATCH_LIMIT = 5;
 
 type Suggestion = { prediction: google.maps.places.PlacePrediction; main: string; secondary: string };
 
@@ -20,9 +34,16 @@ async function details(key: string, place: google.maps.places.Place): Promise<{ 
   return { address: filled.formattedAddress ?? null, lat: filled.location?.lat() ?? null, lng: filled.location?.lng() ?? null };
 }
 
-type Props = { bias: { lat: number; lng: number } | null; onPick: (place: PickedPlace) => void };
+type Props = {
+  bias: { lat: number; lng: number } | null;
+  onPick: (place: PickedPlace) => void;
+  /** Places already used in this trip, offered as quick picks (no Google call). */
+  quick?: TripPlace[];
+};
 
-export function PlaceSearch({ bias, onPick }: Props) {
+type Option = { type: "trip"; place: TripPlace } | { type: "google"; s: Suggestion };
+
+export function PlaceSearch({ bias, onPick, quick = [] }: Props) {
   const config = useMapsConfig();
   const online = useOnline();
   const ids = useId();
@@ -30,6 +51,7 @@ export function PlaceSearch({ bias, onPick }: Props) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [active, setActive] = useState(-1);
   const [message, setMessage] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const token = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const key = config?.mapsBrowserKey ?? null;
   const searchable = Boolean(key && online);
@@ -65,6 +87,27 @@ export function PlaceSearch({ bias, onPick }: Props) {
       clearTimeout(timer);
     };
   }, [key, online, looksLikeLink, text, biasLat, biasLng]);
+
+  const matches = looksLikeLink ? [] : matchPlaces(quick, text).slice(0, MATCH_LIMIT);
+  const options: Option[] = [
+    ...matches.map((place): Option => ({ type: "trip", place })),
+    // A Google result for a place already in the trip is shown once, as the trip place.
+    ...suggestions
+      .filter((s) => !matches.some((m) => m.placeId === s.prediction.placeId))
+      .map((s): Option => ({ type: "google", s })),
+  ];
+
+  function pickTrip(p: TripPlace) {
+    onPick({ placeId: p.placeId, name: p.name, address: p.address, lat: p.lat, lng: p.lng, fetchedAt: p.fetchedAt, kind: p.kind });
+    setText("");
+    setSuggestions([]);
+    setMessage(null);
+  }
+
+  function chooseOption(o: Option) {
+    if (o.type === "trip") pickTrip(o.place);
+    else void choose(o.s);
+  }
 
   async function choose(s: Suggestion) {
     if (!key) return;
@@ -109,24 +152,24 @@ export function PlaceSearch({ bias, onPick }: Props) {
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "ArrowDown" && suggestions.length) {
+    if (e.key === "ArrowDown" && options.length) {
       e.preventDefault();
-      setActive((a) => (a + 1) % suggestions.length);
-    } else if (e.key === "ArrowUp" && suggestions.length) {
+      setActive((a) => (a + 1) % options.length);
+    } else if (e.key === "ArrowUp" && options.length) {
       e.preventDefault();
-      setActive((a) => (a <= 0 ? suggestions.length - 1 : a - 1));
+      setActive((a) => (a <= 0 ? options.length - 1 : a - 1));
     } else if (e.key === "Enter") {
       // The search box sits inside the stop form; Enter here must never submit it.
       e.preventDefault();
-      const s = suggestions[active];
-      if (s) void choose(s);
+      const o = options[active];
+      if (o) chooseOption(o);
       else if (looksLikeLink) void applyLink();
     } else if (e.key === "Escape") {
       setSuggestions([]);
     }
   }
 
-  const open = suggestions.length > 0 && !looksLikeLink;
+  const open = options.length > 0 && !looksLikeLink;
   return (
     <div className={styles.wrap}>
       <label htmlFor={`${ids}-q`} className="field-label">
@@ -149,6 +192,7 @@ export function PlaceSearch({ bias, onPick }: Props) {
           onChange={(e) => {
             setText(e.target.value);
             setMessage(null);
+            setActive(-1);
             if (e.target.value.trim().length < MIN_CHARS) setSuggestions([]);
           }}
           onKeyDown={onKeyDown}
@@ -160,26 +204,51 @@ export function PlaceSearch({ bias, onPick }: Props) {
         </button>
       )}
       <ul id={`${ids}-list`} role="listbox" aria-label="搜尋結果" className={styles.list} hidden={!open}>
-        {suggestions.map((s, i) => (
+        {options.map((o, i) => (
           <li
-            key={s.prediction.placeId}
+            key={o.type === "trip" ? `trip:${o.place.key}` : o.s.prediction.placeId}
             id={`${ids}-opt-${i}`}
             role="option"
             aria-selected={i === active}
             className={styles.option}
             onPointerDown={(e) => {
               e.preventDefault();
-              void choose(s);
+              chooseOption(o);
             }}
           >
-            <PinIcon size={18} />
+            {o.type === "trip" ? <KindIcon kind={o.place.kind} size={18} /> : <PinIcon size={18} />}
             <span>
-              <strong>{s.main}</strong>
-              {s.secondary && <small>{s.secondary}</small>}
+              <strong>{o.type === "trip" ? o.place.name : o.s.main}</strong>
+              {o.type === "trip" ? (
+                <small>
+                  <em className={styles.tripTag}>旅程中</em>
+                  {o.place.address ?? ""}
+                </small>
+              ) : (
+                o.s.secondary && <small>{o.s.secondary}</small>
+              )}
             </span>
           </li>
         ))}
       </ul>
+      {!text && quick.length > 0 && (
+        <div className={styles.quick}>
+          <span className={styles.quickLabel}>這趟旅程的地點</span>
+          <div className={styles.chips}>
+            {(showAll ? quick : quick.slice(0, QUICK_LIMIT)).map((p) => (
+              <button key={p.key} type="button" className={styles.chip} title={p.address ?? undefined} onClick={() => { pickTrip(p); }}>
+                <KindIcon kind={p.kind} size={14} />
+                {p.name}
+              </button>
+            ))}
+            {quick.length > QUICK_LIMIT && (
+              <button type="button" className={`${styles.chip} ${styles.more}`} onClick={() => { setShowAll((v) => !v); }}>
+                {showAll ? "收合" : `顯示全部（${quick.length}）`}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       {message && (
         <p className="hint" role="status">
           {message}

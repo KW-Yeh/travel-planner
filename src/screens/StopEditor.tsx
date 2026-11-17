@@ -11,6 +11,7 @@ import { safeUrl, saveBooking, type ReservationInput } from "../data/bookings";
 import { KIND_DEFAULT_STAY, KIND_LABEL, STAY_OPTIONS } from "../data/labels";
 import { stopsOfDay, useTripBundle, type TripBundle } from "../data/queries";
 import { dayTimeline } from "../data/summary";
+import { tripPlaces } from "../data/tripPlaces";
 import { selectDay } from "./TripLayout";
 
 type StopErrors = { name?: string | undefined; url?: string | undefined };
@@ -65,6 +66,7 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
   const back = `/trips/${trip.id}${dayId ? `?day=${dayId}` : ""}`;
   const located = [...dayStops, ...bundle.stops].find((s) => s.lat !== null && s.lng !== null);
   const bias = located?.lat != null && located.lng != null ? { lat: located.lat, lng: located.lng } : null;
+  const quickPlaces = tripPlaces(bundle.stops, stop?.id ?? null);
 
   async function onSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -138,9 +140,17 @@ function Editor({ bundle, stop, initialDayId, startWithBooking }: EditorProps) {
         <div className="field">
           <PlaceSearch
             bias={bias}
+            quick={quickPlaces}
             onPick={(picked) => {
-              setPlace({ ...picked, fetchedAt: picked.lat !== null ? Date.now() : null });
+              // A reused trip place keeps its original fetch time, so the 30-day coordinate refresh still applies.
+              const fetchedAt = picked.fetchedAt !== undefined ? picked.fetchedAt : picked.lat !== null ? Date.now() : null;
+              setPlace({ ...picked, fetchedAt });
               if (picked.name) setName(picked.name);
+              // A new stop also takes the reused place's kind (e.g. the hotel stays lodging).
+              if (!stop && picked.kind) {
+                setKind(picked.kind);
+                if (!stayTouched) setStay(KIND_DEFAULT_STAY[picked.kind]);
+              }
               setErrors({});
             }}
           />
