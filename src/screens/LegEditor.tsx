@@ -4,6 +4,7 @@ import { directionsUrl } from "../../shared/maps-links";
 import type { CompareResponse, Endpoint, RouteResult, RouteStep } from "../../shared/routes";
 import { LEG_MODES, type Leg, type LegMode, type Stop } from "../../shared/schema";
 import { formatHhmm, zonedToEpoch } from "../../shared/time";
+import { parseTrack } from "../../shared/track";
 import { BackIcon, ModeIcon } from "../components/icons";
 import { setLegManual, setLegNote } from "../data/actions";
 import { MODE_LABEL } from "../data/labels";
@@ -46,16 +47,24 @@ function StepList({ steps, departure }: { steps: RouteStep[]; departure: number 
             {step.kind === "transit" ? (
               <span className={styles.stepBody}>
                 <strong>
+                  {step.color && <span className={styles.lineDot} style={{ background: step.color }} aria-hidden="true" />}
                   {step.line}
                   {step.headsign ? ` 往${step.headsign}` : ""}
                 </strong>
                 <span>
-                  {step.stops !== null ? `${step.stops} 站` : ""}
-                  {step.to ? `，${step.to}下車` : ""}
+                  {[
+                    step.stops !== null ? `${step.stops} 站` : null,
+                    step.to ? `${step.to}下車` : null,
+                    step.exit ? `出口：${step.exit}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join("，")}
                 </span>
               </span>
             ) : (
-              <span className={styles.stepBody}>{step.kind === "walk" ? "步行" : MODE_LABEL.drive}</span>
+              <span className={styles.stepBody}>
+                {step.kind === "walk" ? "步行" : step.mode === "WAIT" ? "候車" : MODE_LABEL.drive}
+              </span>
             )}
             <span className={styles.stepMinutes}>{step.minutes} 分</span>
           </li>
@@ -109,6 +118,26 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
     };
   }, [canLookup, requestKey, leg.id]);
 
+  const [refreshing, setRefreshing] = useState(false);
+  // Asks the provider again for this pair's transit route, bypassing the server cache.
+  async function refreshTransit() {
+    const req = JSON.parse(requestKey) as { origin: Endpoint; destination: Endpoint; departAt: number | null };
+    setRefreshing(true);
+    setError(null);
+    try {
+      const res = await compareRoutes({ ...req, modes: ["transit"], refresh: true });
+      setFetched((prev) => {
+        const merged: CompareResponse = { results: { ...(prev?.key === requestKey ? prev.res?.results : {}), ...res.results } };
+        rememberComparison(leg.id, merged, req.departAt);
+        return { key: requestKey, res: merged };
+      });
+    } catch {
+      setError("重新查詢失敗，請稍後再試。");
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   const current = fetched?.key === requestKey ? fetched : null;
   const lookup: Lookup = !canLookup
     ? unavailable
@@ -158,6 +187,9 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
     }
   })();
   const steps = googleOk?.steps ?? (isManual ? [] : storedSteps);
+  const fromNavitime = googleOk
+    ? googleOk.provider === "navitime"
+    : leg.mode === mode && leg.polyline !== null && parseTrack(leg.polyline) !== null;
 
   return (
     <div className="screen">
@@ -219,9 +251,14 @@ function Editor({ bundle, leg, from, to }: { bundle: TripBundle; leg: Leg; from:
                 {departure !== null ? `${formatHhmm(departure)} 出發` : "路線"}
                 {googleOk && departure !== null && ` → ${formatHhmm(departure + googleOk.minutes)} 抵達`}
               </h2>
-              <span className="hint">Google 路線</span>
+              <span className="hint">{fromNavitime ? "路線資料：NAVITIME" : "Google 路線"}</span>
             </div>
             <StepList steps={steps} departure={departure} />
+            {mode === "transit" && canLookup && !isManual && (
+              <button type="button" className={styles.refresh} disabled={refreshing || lookup.state === "loading"} onClick={() => void refreshTransit()}>
+                {refreshing ? "查詢中…" : "重新查詢"}
+              </button>
+            )}
           </section>
         )}
 

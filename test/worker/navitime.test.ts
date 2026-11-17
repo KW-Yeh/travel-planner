@@ -84,7 +84,7 @@ describe("fetchNavitime", () => {
     const r = await fetchNavitime("rk", REQ, NOW, fetcher);
     expect(r.status).toBe("ok");
     const [input, init] = fetcher.mock.calls[0] ?? [];
-    const url = new URL(String(input));
+    const url = new URL(input instanceof Request ? input.url : input instanceof URL ? input.href : (input ?? ""));
     expect(url.host).toBe("navitime-route-totalnavi.p.rapidapi.com");
     expect(url.pathname).toBe("/route_transit");
     expect(url.searchParams.get("shape")).toBe("true");

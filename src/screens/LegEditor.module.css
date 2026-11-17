@@ -99,6 +99,36 @@
 .stepBody strong {
   color: var(--color-transit);
 }
+.lineDot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: baseline;
+  box-shadow: 0 0 0 1.5px var(--color-surface, #fff);
+}
+.refresh {
+  align-self: flex-start;
+  min-height: var(--tap-min);
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--color-line);
+  background: var(--glass-fill);
+  color: var(--color-primary-strong);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.refresh:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.refresh:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
 .stepBody span {
   font-size: 12px;
   color: var(--color-ink-muted);

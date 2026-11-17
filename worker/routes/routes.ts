@@ -24,7 +24,7 @@ async function cacheKey(req: CompareRequest, mode: LegMode): Promise<string> {
 
 /** Days to keep NAVITIME results; "0" disables. Defaults to 30 (see the NAVITIME design doc). */
 function navitimeTtlMs(env: Env): number {
-  const days = Number(env.NAVITIME_CACHE_TTL_DAYS ?? "30");
+  const days = Number(env.NAVITIME_CACHE_TTL_DAYS || "30");
   return Number.isFinite(days) && days > 0 ? days * 86_400_000 : 0;
 }
 

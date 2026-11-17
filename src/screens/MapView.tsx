@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { directionsUrl } from "../../shared/maps-links";
 import type { Day, Leg, Stop } from "../../shared/schema";
 import { describeDate, formatHhmm } from "../../shared/time";
+import { parseTrack } from "../../shared/track";
 import { BackIcon, ModeIcon, NavigateIcon } from "../components/icons";
 import { MODE_LABEL } from "../data/labels";
 import type { TripBundle } from "../data/queries";
@@ -87,7 +88,22 @@ function GoogleMap({ apiKey, mapId, rows, selected, onSelect }: { apiKey: string
           const from = { lat: row.prev.lat, lng: row.prev.lng };
           const to = { lat: row.stop.lat, lng: row.stop.lng };
           const lines: google.maps.Polyline[] = [];
-          if (row.legIn?.polyline) {
+          const track = row.legIn?.polyline ? parseTrack(row.legIn.polyline) : null;
+          if (track) {
+            // NAVITIME track: each ride in its line colour over a white casing; walking dashed in the day colour.
+            const walkDashes = [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 0.9, strokeColor: color, scale: 3 }, offset: "0", repeat: "12px" }];
+            for (const seg of track) {
+              const path = encoding.decodePath(seg.path);
+              if (seg.walk) {
+                lines.push(new Polyline({ map: map.current, path, strokeOpacity: 0, strokeWeight: 4, icons: walkDashes, clickable: false }));
+              } else {
+                lines.push(
+                  new Polyline({ map: map.current, path, strokeColor: "#ffffff", strokeOpacity: 0.95, strokeWeight: 8, zIndex: 2, clickable: false }),
+                  new Polyline({ map: map.current, path, strokeColor: seg.color ?? color, strokeOpacity: 0.95, strokeWeight: 5, zIndex: 3, clickable: false }),
+                );
+              }
+            }
+          } else if (row.legIn?.polyline) {
             lines.push(
               new Polyline({ map: map.current, path: encoding.decodePath(row.legIn.polyline), strokeColor: color, strokeOpacity: walking ? 0 : 0.85, strokeWeight: 4, icons: dashes }),
             );

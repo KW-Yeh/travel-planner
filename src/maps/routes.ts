@@ -8,10 +8,11 @@ import { writeRows } from "../db/mutate";
 import type { TripBundle } from "../data/queries";
 import { dayTimeline } from "../data/summary";
 
+/** Google prefers the place ID; NAVITIME needs coordinates, so both are sent when known. */
 export function endpointOf(stop: Stop): Endpoint | null {
-  if (stop.place_id) return { placeId: stop.place_id };
-  if (stop.lat !== null && stop.lng !== null) return { lat: stop.lat, lng: stop.lng };
-  return null;
+  const coords = stop.lat !== null && stop.lng !== null ? { lat: stop.lat, lng: stop.lng } : null;
+  if (stop.place_id) return { placeId: stop.place_id, ...coords };
+  return coords;
 }
 
 export function compareRoutes(req: CompareRequest): Promise<CompareResponse> {

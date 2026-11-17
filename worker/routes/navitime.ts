@@ -140,7 +140,7 @@ export async function fetchNavitime(apiKey: string, req: CompareRequest, now: nu
   });
   let res: Response;
   try {
-    res = await fetcher(`https://${NAVITIME_HOST}/route_transit?${params}`, {
+    res = await fetcher(`https://${NAVITIME_HOST}/route_transit?${params.toString()}`, {
       headers: { "x-rapidapi-key": apiKey, "x-rapidapi-host": NAVITIME_HOST },
     });
   } catch {
